@@ -83,9 +83,12 @@ For commercial licensing, collaboration opportunities, or questions, please reac
 ## 📖 Citation
 
 If you use **OncoSharp** in academic research, please cite it as:
+
+```bibtex
 @software{oncosharp2025,
-author = {Ilias Sachpazidis},
-title = {OncoSharp: A Radiation Oncology Toolkit in C#},
-year = {2025},
-url = {https://github.com/isachpaz/OncoSharp}
+  author = {Ilias Sachpazidis},
+  title = {OncoSharp: A Radiation Oncology Toolkit in C#},
+  year = {2025},
+  url = {https://github.com/isachpaz/OncoSharp}
 }
+
