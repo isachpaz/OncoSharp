@@ -5,9 +5,12 @@ It provides robust support for key radiotherapy quantities including:
 
 - 📦 **Volume**
 - 🎯 **Physical dose**
-- ⚗️ **Radiobiological dose (e.g., EQD2, EQD0, BED)**
+- ⚗️ **Radiobiological dose** (e.g., **EQD2**, **EQD0**, **BED**)
 - 🧬 **Tumor cell density**
 - 🔬 **PET tracer activity**
+- 🧪 **Partial oxygen pressure (pO₂)**
+- 📈 **Probability** values (e.g., TCP/NTCP)
+- 📅 **Number of fractions**
 
 Built for high-performance and extensibility, OncoSharp includes tools to compute:
 
