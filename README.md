@@ -1,3 +1,4 @@
+![OncoSharp Logo](./assets/OncoSharp_Icon_Compressed.jpg)
 # OncoSharp
 **OncoSharp** is a modular C# library for radiation oncology research and development, with a strong focus on **dose-volume histogram (DVH) analysis** and **biologically informed treatment modeling**.
 
