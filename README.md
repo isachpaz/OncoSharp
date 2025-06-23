@@ -76,7 +76,7 @@ Comprehensive documentation is in development. Future updates will include:
 For commercial licensing, collaboration opportunities, or questions, please reach out to:
 
 **[Dr. Ilias Sachpazidis]**  
-📧 **ilias.sachpazidis@uniklinik-freiburg.de**
+📧 **ilias.sachpazidis@gmail.com**
 
 ---
 
