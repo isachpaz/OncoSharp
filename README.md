@@ -43,7 +43,7 @@ TBD — NuGet package and build instructions will be provided in a future releas
 
 - 💼 **Commercial License Required**  
   Commercial, clinical, or for-profit use requires a separate paid license.  
-  Please contact **[your-email@example.com]** to obtain commercial licensing terms.
+  Please contact **[ilias.sachpazidis@gmail.com]** to obtain commercial licensing terms.
 
 By using this software, you agree to the terms of the applicable license.
 
