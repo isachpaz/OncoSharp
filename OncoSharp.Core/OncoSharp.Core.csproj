@@ -17,10 +17,20 @@
     <Company />
     <Authors>Dr. Ilias Sachpazidis</Authors>
     <Title>OncoSharp - A .NET Toolkit for Radiotherapy Applications</Title>
+    <ApplicationIcon>OncoSharp_Logo.ico</ApplicationIcon>
+    <PackageIcon>OncoSharp_Icon_Compressed.jpg</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="OncoSharp_Logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\assets\OncoSharp_Icon_Compressed.jpg">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
