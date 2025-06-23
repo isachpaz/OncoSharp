@@ -8,6 +8,6 @@ namespace OncoSharp.Core.Quantities.DimensionlessValues
 {
     public class GammaConfig : DoubleConfig
     {
-        public static GammaConfig Default() => new GammaConfig();
+        public new static GammaConfig Default() => new GammaConfig();
     }
 }

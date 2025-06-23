@@ -8,8 +8,13 @@ using System;
 
 namespace OncoSharp.Core.Quantities.Density
 {
-    public struct CellDensity : IComparable<CellDensity>, IEquatable<CellDensity>
+    public readonly struct CellDensity : IComparable<CellDensity>, IEquatable<CellDensity>
     {
+        public override bool Equals(object obj)
+        {
+            return obj is CellDensity other && Equals(other);
+        }
+
         private readonly QuantityCore<CellDensityUnit> _core;
 
         public double Value => _core.Value;

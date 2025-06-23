@@ -29,7 +29,7 @@ namespace OncoSharp.Core.Quantities.Extensions
         {
             return VolumeValue.New(volume, VolumeUnit.CM3);
         }
-        
+
         public static VolumeValue mm3(this int volume)
         {
             return VolumeValue.New(volume, VolumeUnit.MM3);

@@ -8,6 +8,6 @@ namespace OncoSharp.Core.Quantities.DimensionlessValues
 {
     public class SerialityFactorConfig : DoubleConfig
     {
-        public static SerialityFactorConfig Default() => new SerialityFactorConfig();
+        public new static SerialityFactorConfig Default() => new SerialityFactorConfig();
     }
 }

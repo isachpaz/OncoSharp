@@ -4,10 +4,13 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-namespace OncoSharp.Core.Quantities.DimensionlessValues
+namespace OncoSharp.DVH
 {
-    public class MFactorConfig : DoubleConfig
+    public enum DVHSourceType
     {
-        public new static MFactorConfig Default() => new MFactorConfig();
+        Undefined = 0,
+        DoseMatrix = 1,
+        ExportedDVH = 2,
+        MonteCarlo = 3,
     }
 }

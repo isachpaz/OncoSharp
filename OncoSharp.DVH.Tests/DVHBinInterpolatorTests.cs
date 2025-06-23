@@ -4,10 +4,22 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-namespace OncoSharp.Core.Quantities.DimensionlessValues
+using NUnit.Framework;
+
+namespace OncoSharp.DVH.Tests
 {
-    public class MFactorConfig : DoubleConfig
+    [TestFixture]
+    public class DVHBinInterpolatorTests
     {
-        public new static MFactorConfig Default() => new MFactorConfig();
+        [SetUp]
+        public void SetUp()
+        {
+        }
+
+
+        [Test]
+        public void Test1()
+        {
+        }
     }
 }

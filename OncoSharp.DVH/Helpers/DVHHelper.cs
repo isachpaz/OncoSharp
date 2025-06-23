@@ -4,10 +4,12 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-namespace OncoSharp.Core.Quantities.DimensionlessValues
+using OncoSharp.DVH.Decorators;
+
+namespace OncoSharp.DVH.Helpers
 {
-    public class MFactorConfig : DoubleConfig
+    public static class DVHHelper
     {
-        public new static MFactorConfig Default() => new MFactorConfig();
+        public static IDVHBase NormalizeVolume(this IDVHBase dvh) => new VolumeNormalization(dvh);
     }
 }

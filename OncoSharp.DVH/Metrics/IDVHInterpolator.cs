@@ -4,10 +4,13 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-namespace OncoSharp.Core.Quantities.DimensionlessValues
+using OncoSharp.Core.Quantities.Volume;
+
+namespace OncoSharp.DVH.Metrics
 {
-    public class MFactorConfig : DoubleConfig
+    public interface IDVHInterpolator
     {
-        public new static MFactorConfig Default() => new MFactorConfig();
+        double GetDoseAtVolume(VolumeValue volume);
+        VolumeValue GetVolumeAtDose(double dose, VolumeUnit unit);
     }
 }

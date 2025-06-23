@@ -9,9 +9,14 @@ using OncoSharp.Core.Quantities.Interfaces;
 
 namespace OncoSharp.Core.Quantities.DimensionlessValues
 {
-    public struct SerialityFactorValue : IComparable<SerialityFactorValue>, IEquatable<SerialityFactorValue>,
+    public readonly struct SerialityFactorValue : IComparable<SerialityFactorValue>, IEquatable<SerialityFactorValue>,
         IQuantityCreation<SerialityFactorValue, UnitLess>
     {
+        public override bool Equals(object obj)
+        {
+            return obj is SerialityFactorValue other && Equals(other);
+        }
+
         private readonly QuantityCore<UnitLess> _core;
 
         public double Value => _core.Value;

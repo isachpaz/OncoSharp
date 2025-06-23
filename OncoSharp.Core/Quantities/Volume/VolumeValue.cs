@@ -36,6 +36,11 @@ namespace OncoSharp.Core.Quantities.Volume
         public int CompareTo(VolumeValue other) => _core.CompareTo(other._core);
         public bool Equals(VolumeValue other) => _core.Equals(other._core);
 
+        public override bool Equals(object obj)
+        {
+            return obj is VolumeValue other && Equals(other);
+        }
+
         public override int GetHashCode() => _core.GetHashCode();
 
         public string ToString(string format, IFormatProvider formatProvider) =>

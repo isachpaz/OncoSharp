@@ -8,6 +8,6 @@ namespace OncoSharp.Core.Quantities.DimensionlessValues
 {
     public class NFactorConfig : DoubleConfig
     {
-        public static NFactorConfig Default() => new NFactorConfig();
+        public new static NFactorConfig Default() => new NFactorConfig();
     }
 }
