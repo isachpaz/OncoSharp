@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use OncoSharp in your research, please cite it as below."
+title: "OncoSharp: A .NET Toolkit for Radiotherapy Applications"
+authors:
+  - family-names: Sachpazidis
+    given-names: Ilias
+version: 1.0.0
+date-released: 2025-06-23
+license: Custom, Non-Commercial Academic Use Only
+repository-code: https://github.com/isachpaz/OncoSharp
+url: https://github.com/isachpaz/OncoSharp
