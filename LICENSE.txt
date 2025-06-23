@@ -1,0 +1,33 @@
+OncoSharp Academic and Research Use License
+------------------------------------------------
+
+Copyright (c) 2014 - 2025  Dr. Ilias Sachpazidis
+
+Permission is hereby granted, free of charge, to any person or organization 
+using this software for **non-commercial academic and research purposes**, 
+to use, copy, modify, and distribute this software and its documentation, 
+subject to the following conditions:
+
+1. **Non-Commercial Use Only**  
+   This software may be used **only** for academic, educational, or research purposes.  
+   Any **commercial use** — including use within commercial organizations, 
+   products sold or licensed for a fee, or services provided for compensation — 
+   is **strictly prohibited** without a separate commercial license.
+
+2. **Attribution Required**  
+   Any publication, software, or research work that makes use of this software 
+   **must include proper acknowledgment**. Acceptable forms of attribution include:
+   - Citation of the original project in research publications,
+   - Mention of OncoSharp in the software’s documentation or "About" section,
+   - A link to the GitHub repository: https://github.com/isachpaz/OncoSharp
+
+3. **No Warranty**  
+   This software is provided "as is", without warranty of any kind, express or implied, 
+   including but not limited to the warranties of merchantability, fitness for a particular purpose, 
+   or noninfringement. In no event shall the authors or copyright holders 
+   be liable for any claim, damages, or other liability.
+
+4. **Commercial License Contact**  
+   For commercial use, please contact: [ilias.sachpazidis@gmail.com] to discuss licensing terms.
+
+------------------------------------------------
