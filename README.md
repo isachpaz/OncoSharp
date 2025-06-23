@@ -80,7 +80,7 @@ For commercial licensing, collaboration opportunities, or questions, please reac
 
 ---
 
-## 📖 Citation (Optional)
+## 📖 Citation
 
 If you use **OncoSharp** in academic research, please cite it as:
 @software{oncosharp2025,
