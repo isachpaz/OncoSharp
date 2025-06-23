@@ -1,4 +1,4 @@
-<img src="./assets/OncoSharp_Icon_Compressed.jpg" alt="OncoSharp Logo" width="50%" />
+<img src="./assets/OncoSharp_Icon_Compressed.jpg" alt="OncoSharp Logo" width="10%" />
 
 
 # OncoSharp
