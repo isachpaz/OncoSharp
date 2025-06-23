@@ -90,7 +90,7 @@ If you use **OncoSharp** in academic research, please cite it as:
 ```bibtex
 @software{oncosharp2025,
   author = {Ilias Sachpazidis},
-  title = {OncoSharp: A Radiation Oncology Toolkit in C#},
+  title = {OncoSharp: A .NET Toolkit for Radiotherapy Applications},
   year = {2025},
   url = {https://github.com/isachpaz/OncoSharp}
 }
