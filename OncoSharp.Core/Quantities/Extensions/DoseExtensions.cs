@@ -29,5 +29,15 @@ namespace OncoSharp.Core.Quantities.Extensions
         {
             return EQD2Value.InGy(doseInGy);
         }
+
+        public static EQD0Value Gy_Eqd0(this double doseInGy)
+        {
+            return EQD0Value.InGy(doseInGy);
+        }
+        
+        public static EQD0Value Gy_Eqd0(this int doseInGy)
+        {
+            return EQD0Value.InGy(doseInGy);
+        }
     }
 }

@@ -195,24 +195,19 @@ namespace OncoSharp.Core.Quantities.Dose
 
         public static EQD0Value InGy(double value, IQuantityConfig<DoseUnit> config = null)
         {
-            CheckDoseLimits(value);
+            
             return new EQD0Value(value, DoseUnit.Gy, config);
         }
 
         public static EQD0Value InCGy(double value, IQuantityConfig<DoseUnit> config = null)
         {
-            CheckDoseLimits(value);
+
             return new EQD0Value(value, DoseUnit.cGy, config);
         }
 
         public static EQD0Value New(double value, DoseUnit unit, IQuantityConfig<DoseUnit> config = null)
         {
             return new EQD0Value(value, unit, config);
-        }
-
-        private static void CheckDoseLimits(double value)
-        {
-            if (value < 0.0) throw new ArgumentException("Dose cannot be less than zero.");
         }
 
         private string GetUnitAsString()
