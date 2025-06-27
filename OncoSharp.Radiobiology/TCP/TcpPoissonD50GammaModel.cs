@@ -19,21 +19,15 @@ namespace OncoSharp.Radiobiology.TCP
     {
         public double D50 { get; }
         public double Gamma { get; }
-        public CellDensity Density { get; }
-        public double Alpha { get; }
-
+        
         public TcpPoissonD50GammaModel(double d50, double gamma)
         {
             D50 = d50;
             Gamma = gamma;
         }
 
-        public virtual ProbabilityValue ComputeVoxelResponse(DoseCloudPoint<EQD2Value> dosePoint)
+        public virtual ProbabilityValue ComputeVoxelResponse(EQD2Value eqd2)
         {
-            var volume = dosePoint.Volume;
-            var eqd2 = dosePoint.Dose;
-
-
             var egamma = (Math.E * Gamma);
             var lnln2 = Math.Log(Math.Log(2.0));
             double egamma_minus_lnln2 = egamma - lnln2;
@@ -67,7 +61,7 @@ namespace OncoSharp.Radiobiology.TCP
                 }
                 else
                 {
-                    var voxelResponse = ComputeVoxelResponse(point);
+                    var voxelResponse = ComputeVoxelResponse(point.Dose);
                     tcp *= Math.Pow(voxelResponse.Value, volumeFraction);
                 }
             }
