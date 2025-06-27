@@ -12,14 +12,13 @@ using OncoSharp.Core.Quantities.Extensions;
 using OncoSharp.Core.Quantities.Volume;
 using OncoSharp.Radiobiology.TCP;
 using System.Diagnostics;
-using OncoSharp.Core.Quantities;
 
 namespace OncoSharp.Radiobiology.Tests;
 
 [TestFixture]
 public class TcpPoissonDensityModelTests
 {
-    private TcpPoissonDensityModel _model;
+    private TcpPoissonDensityModel _model = null!;
 
     [SetUp]
     public void SetUp()
