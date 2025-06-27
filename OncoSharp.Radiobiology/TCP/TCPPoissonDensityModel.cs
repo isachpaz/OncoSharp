@@ -8,13 +8,9 @@ using OncoSharp.Core.Quantities.CloudPoint;
 using OncoSharp.Core.Quantities.Density;
 using OncoSharp.Core.Quantities.Dose;
 using OncoSharp.Core.Quantities.Probability;
-using OncoSharp.Core.Quantities.Volume;
-using OncoSharp.DVH;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace OncoSharp.Radiobiology.TCP
 {
