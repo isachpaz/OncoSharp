@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Radiobiology", "O
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Radiobiology.Tests", "OncoSharp.Radiobiology.Tests\OncoSharp.Radiobiology.Tests.csproj", "{81E56DF8-D842-4FA6-B734-47044A73B804}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.ModelFit", "OncoSharp.ModelFit\OncoSharp.ModelFit.csproj", "{5B376FDB-4C6D-438B-AE30-29B3BB8D4686}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{81E56DF8-D842-4FA6-B734-47044A73B804}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81E56DF8-D842-4FA6-B734-47044A73B804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81E56DF8-D842-4FA6-B734-47044A73B804}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B376FDB-4C6D-438B-AE30-29B3BB8D4686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B376FDB-4C6D-438B-AE30-29B3BB8D4686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B376FDB-4C6D-438B-AE30-29B3BB8D4686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B376FDB-4C6D-438B-AE30-29B3BB8D4686}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
