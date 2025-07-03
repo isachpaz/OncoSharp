@@ -50,7 +50,7 @@ namespace OncoSharp.Radiobiology.TCP
             if (points == null) throw new ArgumentNullException(nameof(points));
             ProbabilityValue tcp = ProbabilityValue.One;
             var totalVolume = points.Select(p => p.Volume.Value).Sum();
-
+            
             foreach (var point in points)
             {
                 var dose = point.Dose;
