@@ -6,6 +6,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace OncoSharp.Core.Quantities.Helpers.Maths
 {
@@ -48,6 +49,32 @@ namespace OncoSharp.Core.Quantities.Helpers.Maths
             double y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x);
 
             return sign * y;
+        }
+
+        
+        internal static void ThrowMinMaxException<T>(T min, T max)
+        {
+            throw new ArgumentException();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double Clamp(double value, double min, double max)
+        {
+            if (min > max)
+            {
+                ThrowMinMaxException(min, max);
+            }
+
+            if (value < min)
+            {
+                return min;
+            }
+            else if (value > max)
+            {
+                return max;
+            }
+
+            return value;
         }
     }
 }
