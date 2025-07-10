@@ -8,9 +8,8 @@ using OncoSharp.Core.Quantities.CloudPoint;
 using OncoSharp.Core.Quantities.Dose;
 using OncoSharp.Core.Quantities.Fractions;
 using OncoSharp.Core.Quantities.Volume;
-using System.Collections.Generic;
 
-namespace OncoSharp.ModelFit.Interfaces
+namespace OncoSharp.RTDomainModel
 {
     public interface IPlanItem
     {

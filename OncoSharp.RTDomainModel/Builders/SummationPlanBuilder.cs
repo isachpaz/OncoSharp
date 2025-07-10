@@ -4,10 +4,7 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-using OncoSharp.ModelFit.Interfaces;
-using System.Collections.Generic;
-
-namespace OncoSharp.ModelFit.Builders
+namespace OncoSharp.RTDomainModel.Builders
 {
     //public class SummationPlanBuilder
     //{

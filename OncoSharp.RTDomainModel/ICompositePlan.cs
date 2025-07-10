@@ -4,10 +4,14 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
-namespace OncoSharp.ModelFit.Interfaces
+using System.Collections.Generic;
+
+namespace OncoSharp.RTDomainModel
 {
-    public interface IStructureModelStrategy
+    public interface ICompositePlan : IPlanItem
     {
-        string GetStructure(string piz, string planId);
+        IEnumerable<IPlanItem> GetChildPlans(); 
+        void AddPlan(IPlanItem plan);
+        bool CanAddPlan(IPlanItem plan);
     }
 }
