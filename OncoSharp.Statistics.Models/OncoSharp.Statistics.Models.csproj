@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OncoSharp.Optimization.Algorithms\OncoSharp.Optimization.Algorithms.csproj" />
+    <ProjectReference Include="..\OncoSharp.Radiobiology\OncoSharp.Radiobiology.csproj" />
+    <ProjectReference Include="..\OncoSharp.RTDomainModel\OncoSharp.RTDomainModel.csproj" />
+    <ProjectReference Include="..\OncoSharp.Statistics.Abstractions\OncoSharp.Statistics.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
+  </ItemGroup>
+
+</Project>
