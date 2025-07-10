@@ -9,10 +9,7 @@ namespace OncoSharp.Core.Quantities.Helpers.Maths
     using System;
     using System.Collections.Generic;
 
-    using System;
-    using System.Collections.Generic;
-
-    public class HammersleySequence
+  public class HammersleySequence
     {
         /// <summary>
         /// Generate the Hammersley sequence for a given number of points, dimensions, and bounds.
