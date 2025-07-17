@@ -24,6 +24,8 @@ namespace OncoSharp.SimplexGlobalSolver
         private readonly ILogger _logger;
         private readonly ConcurrentBag<SimplexResult> _solutions = new ConcurrentBag<SimplexResult>();
 
+        private readonly Delegate _pinnedDelegate;
+
         public SimplexGlobalSolver(
             Func<double[], double> objectiveFunction,
             List<(double Min, double Max)> bounds,
@@ -32,6 +34,7 @@ namespace OncoSharp.SimplexGlobalSolver
             ILogger logger = null)
         {
             _objectiveFunction = objectiveFunction;
+            _pinnedDelegate = _objectiveFunction;
             _bounds = bounds;
             _convergenceTolerance = convergenceTolerance;
             _maximumIterations = maximumIterations;
@@ -73,26 +76,47 @@ namespace OncoSharp.SimplexGlobalSolver
             return GetBestResult();
         }
 
-        private void MaximizeFromInitialGuess(double[] initialGuess)
+        private readonly ConcurrentDictionary<NLoptSolver, Delegate> _delegatePins = new ConcurrentDictionary<NLoptSolver, Delegate>();
+
+        public SimplexResult MaximizeFromInitialGuess(double[] initialGuess)
         {
-            var algorithmName = NLoptAlgorithm.LN_NELDERMEAD;
-            var numOfVariables = (uint)_bounds.Count;
-            var solver = new NLoptSolver(algorithmName, numOfVariables, 1e-6, _maximumIterations);
+            var solver = new NLoptSolver(NLoptAlgorithm.LN_NELDERMEAD, (uint)_bounds.Count, _convergenceTolerance, _maximumIterations);
 
             solver.SetLowerBounds(BoundUtils.GetLowerBounds(_bounds));
             solver.SetUpperBounds(BoundUtils.GetUpperBounds(_bounds));
 
-            solver.SetMaxObjective(_objectiveFunction);
+            // Pin the delegate
+            var func = _objectiveFunction;
+            solver.SetMaxObjective(func);
+            _delegatePins[solver] = func; // ❗ Strong reference
 
-            Debug.WriteLine($"Initial guess: {string.Join(", ", initialGuess)}");
-            // Optimize
-            var result1 = solver.Optimize(initialGuess, out double? minf1);
+            var result = solver.Optimize(initialGuess, out double? minf);
+            if (minf != null)
+                _solutions.Add(new SimplexResult(initialGuess, minf.Value, result));
 
-            if (minf1 != null)
-            {
-                var simplexSolution = new SimplexResult(initialGuess, minf1.Value, result1);
-                _solutions.Add(simplexSolution);
-            }
+            _delegatePins.TryRemove(solver, out _); // 🔓 Clean up
+
+            var simplexSolution = new SimplexResult(initialGuess, minf.Value, result);
+            return simplexSolution;
+
+            //var algorithmName = NLoptAlgorithm.LN_NELDERMEAD;
+            //var numOfVariables = (uint)_bounds.Count;
+            //var solver = new NLoptSolver(algorithmName, numOfVariables, 1e-6, _maximumIterations);
+
+            //solver.SetLowerBounds(BoundUtils.GetLowerBounds(_bounds));
+            //solver.SetUpperBounds(BoundUtils.GetUpperBounds(_bounds));
+
+            //solver.SetMaxObjective(_objectiveFunction);
+
+            //Debug.WriteLine($"Initial guess: {string.Join(", ", initialGuess)}");
+            //// Optimize
+            //var result1 = solver.Optimize(initialGuess, out double? minf1);
+
+            //if (minf1 != null)
+            //{
+            //    var simplexSolution = new SimplexResult(initialGuess, minf1.Value, result1);
+            //    _solutions.Add(simplexSolution);
+            //}
         }
 
         private SimplexResult GetBestResult()
