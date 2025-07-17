@@ -4,20 +4,22 @@
 // // Commercial use requires a separate license.
 // // See https://github.com/isachpaz/OncoSharp for more information.
 
+using OncoSharp.Core.Quantities;
 using OncoSharp.Core.Quantities.CloudPoint;
 using OncoSharp.Core.Quantities.Dose;
+using OncoSharp.Core.Quantities.Helpers.Maths;
 using OncoSharp.Core.Quantities.Probability;
+using OncoSharp.Radiobiology.GEUD;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using OncoSharp.Core.Quantities;
-using OncoSharp.Core.Quantities.Helpers.Maths;
 
 namespace OncoSharp.Radiobiology.TCP
 {
     public class TcpProbitModel
     {
+        public Geud2GyModel GeudModel { get; }
         public double D50 { get; }
         public double Gamma50 { get; }
 
@@ -28,10 +30,13 @@ namespace OncoSharp.Radiobiology.TCP
             Gamma50 = gamma50;
         }
 
-        public virtual ProbabilityValue ComputeVoxelResponse(EQD2Value eqd2)
+       public virtual ProbabilityValue ComputeTcp(List<DoseCloudPoint<EQD2Value>> points)
         {
-            var response = Gamma50 * Math.Sqrt(Math.PI) * (1.0 - eqd2.Value / D50);
-            response = 0.5*(1.0 - MathUtils.Erf(response));
+            if (points == null) throw new ArgumentNullException(nameof(points));
+            
+            var geud2Gy = GeudModel.Calculate(points);
+            var response = Gamma50 * Math.Sqrt(Math.PI) * (1.0 - geud2Gy.Value / D50);
+            response = 0.5 * (1.0 - MathUtils.Erf(response));
 
             if (Double.IsNaN(response))
             {
@@ -40,32 +45,6 @@ namespace OncoSharp.Radiobiology.TCP
             }
 
             return ProbabilityValue.New(response);
-        }
-
-        public virtual ProbabilityValue ComputeTcp(List<DoseCloudPoint<EQD2Value>> points)
-        {
-            if (points == null) throw new ArgumentNullException(nameof(points));
-            ProbabilityValue tcp = ProbabilityValue.One;
-            var totalVolume = points.Select(p => p.Volume.Value).Sum();
-
-            foreach (var point in points)
-            {
-                var dose = point.Dose;
-                var volume = point.Volume;
-                var volumeFraction = volume.Value / totalVolume;
-
-                if (Math.Abs(volumeFraction) < 1E-16)
-                {
-                    tcp *= 1.0;
-                }
-                else
-                {
-                    var voxelResponse = ComputeVoxelResponse(point.Dose);
-                    tcp *= Math.Pow(voxelResponse.Value, volumeFraction);
-                }
-            }
-
-            return tcp;
         }
     }
 }
