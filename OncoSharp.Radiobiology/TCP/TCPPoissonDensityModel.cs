@@ -44,7 +44,7 @@ namespace OncoSharp.Radiobiology.TCP
             return ProbabilityValue.New(response);
         }
 
-        public virtual ProbabilityValue ComputeTcp(List<DoseCloudPoint<EQD0Value>> points)
+        public virtual ProbabilityValue ComputeTcp(IReadOnlyList<DoseCloudPoint<EQD0Value>>  points)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));
             ProbabilityValue tcp = ProbabilityValue.One;

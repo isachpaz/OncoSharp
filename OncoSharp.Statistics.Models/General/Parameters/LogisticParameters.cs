@@ -33,6 +33,8 @@ namespace OncoSharp.Statistics.Models.General.Parameters
             return new double[] { parameters.Beta1, parameters.Beta1 };
         }
 
+        public int GetParametersCount() => 2;
+
         public string[] ParameterNames => new string[] { "Beta0", "Beta1" };
     }
 }

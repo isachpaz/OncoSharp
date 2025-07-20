@@ -4,9 +4,10 @@
 // Commercial use requires a separate license.
 // See https://github.com/isachpaz/OncoSharp for more information.
 
+using OncoSharp.Statistics.Abstractions.Helpers;
 using System;
 using System.Collections.Generic;
-using OncoSharp.Statistics.Abstractions.Helpers;
+using System.Security.Cryptography;
 
 namespace OncoSharp.Statistics.Abstractions.MLEEstimators
 {
@@ -14,6 +15,17 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         : MaximumLikelihoodEstimator<TData, TParameters>
         where TParameters : new()
     {
+        /// <summary>
+        /// 
+        /// observations[i] == true → the patient had a complication (tox event).
+        /// observations[i] == false → the patient did not have a complication.
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="observations"></param>
+        /// <param name="inputData"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         protected override double LogLikelihood(
             TParameters parameters,
             IList<bool> observations,

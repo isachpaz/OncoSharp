@@ -10,4 +10,8 @@
     <ProjectReference Include="..\OncoSharp.DVH\OncoSharp.DVH.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GeneralModels\" />
+  </ItemGroup>
+
 </Project>

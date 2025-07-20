@@ -30,6 +30,9 @@ namespace OncoSharp.Statistics.Models.Ntcp.Parameters
             throw new NotImplementedException();
         }
 
+        public int GetParametersCount() => 3;
+        
+
         public string[] ParameterNames { get; }
     }
 }

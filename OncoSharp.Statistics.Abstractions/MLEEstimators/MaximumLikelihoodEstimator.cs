@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using OncoSharp.Optimization.Abstractions.Interfaces;
 using OncoSharp.Statistics.Abstractions.ConfidenceInterval;
 using OncoSharp.Statistics.Abstractions.Helpers;
@@ -20,9 +21,13 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
     /// <typeparam name="TData">The type of input data for the model.</typeparam>
     /// <typeparam name="TParameters">The type representing model parameters.</typeparam>
     public abstract class MaximumLikelihoodEstimator<TData, TParameters> :
-        IMleInternals<TData, TParameters>
-        where TParameters : new()
+        IMleInternals<TData, TParameters> where TParameters : new()
     {
+
+        private Func<double[], double> _objectiveFunction;
+        private Delegate _pinnedDelegate; // keep it alive
+
+
         /// <summary>
         /// Fits the model to the provided data using MLE.
         /// </summary>
@@ -44,34 +49,58 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
             double bestLogLikelihood = double.NegativeInfinity;
             TParameters bestParams = default;
 
+
+            // ✅ Keep a strong reference to the delegate
+            _objectiveFunction = parameters =>
+            {
+                var paramObj = ConvertVectorToParameters(parameters);
+                var logLikelihood = LogLikelihood(paramObj, observations, inputData);
+
+                if (logLikelihood > bestLogLikelihood)
+                {
+                    bestLogLikelihood = logLikelihood;
+                    bestParams = paramObj;
+                    onImprovedSolution?.Invoke(new MleResult<TParameters>(
+                        parameters: bestParams,
+                        logLikelihood: logLikelihood));
+                }
+
+                return logLikelihood;
+            };
+
+            _pinnedDelegate = _objectiveFunction;
+
             optimizer
                 .SetLowerBounds(lowerBounds)
                 .SetUpperBounds(upperBounds)
-                .SetMaxObjective(parameters =>
-                {
-                    var paramObj = ConvertVectorToParameters(parameters);
-                    var logLikelihood = LogLikelihood(paramObj, observations, inputData);
-
-                    if (logLikelihood > bestLogLikelihood)
-                    {
-                        bestLogLikelihood = logLikelihood;
-                        bestParams = paramObj;
-                        onImprovedSolution?.Invoke(new MleResult<TParameters>(
-                            parameters: bestParams,
-                            logLikelihood: logLikelihood));
-                    }
-
-                    return logLikelihood;
-                });
+                .SetMaxObjective(_objectiveFunction);
 
             var result = optimizer.Maximize(initialParams);
 
+            var totalObservations = observations.Count;
+            var aic = ComputeAIC(result.ObjectiveValue, result.OptimizedParameters.Length);
+            var bic = ComputeBIC(result.ObjectiveValue, result.OptimizedParameters.Length, totalObservations);
 
             return new MleResult<TParameters>(
                 parameters: bestParams,
                 standardErrors: CalculateStandardErrors(result.OptimizedParameters, result.ObjectiveValue),
                 logLikelihood: result.ObjectiveValue,
-                optResult: result);
+                optResult: result,
+                aic,
+                bic,
+                totalObservations,
+                observations.Count(x => x==true),
+                observations.Count(x => x == false));
+        }
+
+        public double ComputeAIC(double logLikelihood, int k)
+        {
+            return -2.0 * logLikelihood + 2.0 * k;
+        }
+
+        public double ComputeBIC(double logLikelihood, int k, int n)
+        {
+            return -2.0 * logLikelihood + k * Math.Log(n);
         }
 
         /// <summary>
@@ -105,6 +134,9 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
 
         /// <summary>
         /// Computes the log-likelihood for the given parameters and data.
+        /// observations[i] = true means...
+        ///     TCP => Tumor was controlled (true)
+        ///     NTCP => A complication occurred (true)
         /// </summary>
         protected abstract double LogLikelihood(
             TParameters parameters,
@@ -142,9 +174,10 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         public virtual ProfileLikelihoodCI<TData, TParameters> GetProfileLikelihoodCI(
             IList<TData> inputData,
             IList<bool> observations,
-            double confidenceLevel = 0.95)
+            double confidenceLevel = 0.95,
+            int maxIterations = 100)
         {
-            return new ProfileLikelihoodCI<TData, TParameters>(this, inputData, observations, confidenceLevel);
+            return new ProfileLikelihoodCI<TData, TParameters>(this, inputData, observations, confidenceLevel, maxIterations);
         }
     }
 }

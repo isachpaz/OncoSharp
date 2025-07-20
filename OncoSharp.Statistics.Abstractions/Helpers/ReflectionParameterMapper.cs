@@ -40,6 +40,11 @@ namespace OncoSharp.Statistics.Abstractions.Helpers
                 .ToArray();
         }
 
+        public int GetParametersCount()
+        {
+            return _orderedProperties.Length;
+        }
+
         public T FromArray(double[] array)
         {
             if (array.Length != _orderedProperties.Length)

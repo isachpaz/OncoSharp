@@ -33,6 +33,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Abstra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models", "OncoSharp.Statistics.Models\OncoSharp.Statistics.Models.csproj", "{126B4849-0881-445D-84CD-3F6A3E60CF7B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Projects", "Projects", "{52258D48-5C20-4CA2-A656-DEECD40D0EA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GliaaAnalysisApp", "GliaaAnalysisApp\GliaaAnalysisApp.csproj", "{041B4DA3-98DC-4A24-9FBF-D31B197191D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models.Tests", "OncoSharp.Statistics.Models.Tests\OncoSharp.Statistics.Models.Tests.csproj", "{CC4E96C8-9494-4453-821B-0235B60F8B1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +101,14 @@ Global
 		{126B4849-0881-445D-84CD-3F6A3E60CF7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{126B4849-0881-445D-84CD-3F6A3E60CF7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{126B4849-0881-445D-84CD-3F6A3E60CF7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{041B4DA3-98DC-4A24-9FBF-D31B197191D3}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{041B4DA3-98DC-4A24-9FBF-D31B197191D3}.Debug|Any CPU.Build.0 = Debug|x64
+		{041B4DA3-98DC-4A24-9FBF-D31B197191D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{041B4DA3-98DC-4A24-9FBF-D31B197191D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +117,8 @@ Global
 		{A9E96D77-5A68-4EB3-956E-AAE0F69EB152} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{BD2FF32E-DFF1-4B7D-80D8-A0A38DBA6DFA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{81E56DF8-D842-4FA6-B734-47044A73B804} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{041B4DA3-98DC-4A24-9FBF-D31B197191D3} = {52258D48-5C20-4CA2-A656-DEECD40D0EA7}
+		{CC4E96C8-9494-4453-821B-0235B60F8B1A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF0FE4D9-83F4-405F-9EF1-623F8DCBE8B8}

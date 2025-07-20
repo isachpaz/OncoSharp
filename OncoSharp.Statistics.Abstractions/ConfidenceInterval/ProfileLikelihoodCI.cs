@@ -65,6 +65,48 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             return (lower, upper);
         }
 
+        //private double FindBound(
+        //    int direction,
+        //    double startValue,
+        //    int paramIndex,
+        //    double targetLogL,
+        //    double[] mleParams)
+        //{
+        //    double step = 0.05 * Math.Abs(startValue == 0 ? 1.0 : startValue);
+        //    double current = startValue;
+        //    double previous = current;
+        //    int iter = 0;
+
+        //    while (iter++ < _maxIterations)
+        //    {
+        //        current += direction * step;
+
+        //        double[] testParams = (double[])mleParams.Clone();
+        //        testParams[paramIndex] = current;
+
+        //        double logL = MaximizeWithFixedParameter(testParams, paramIndex);
+
+        //        if (logL < targetLogL)
+        //        {
+        //            // Use bisection to refine
+        //            return BisectionSearch(paramIndex, previous, current, targetLogL, mleParams,  maxIter: _maxIterations);
+        //        }
+
+        //        previous = current;
+        //    }
+
+        //    if (direction == -1)
+        //    {
+        //        return double.NegativeInfinity;
+        //    }
+        //    else
+        //    {
+        //        return double.PositiveInfinity;
+        //    }
+
+        //    throw new InvalidOperationException("Profile likelihood CI bound not found within iteration limit.");
+        //}
+
         private double FindBound(
             int direction,
             double startValue,
@@ -72,31 +114,52 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double targetLogL,
             double[] mleParams)
         {
-            double step = 0.1 * Math.Abs(startValue == 0 ? 1.0 : startValue);
+            try
+            {
+                var (a, b) = BracketLogLikelihoodDrop(direction, startValue, paramIndex, targetLogL, mleParams);
+                return BisectionSearch(paramIndex, a, b, targetLogL, mleParams, tol: 1e-6, maxIter: _maxIterations);
+            }
+            catch (InvalidOperationException)
+            {
+                return direction == -1 ? double.NegativeInfinity : double.PositiveInfinity;
+            }
+        }
+
+
+        private (double a, double b) BracketLogLikelihoodDrop(
+            int direction,
+            double startValue,
+            int paramIndex,
+            double targetLogL,
+            double[] mleParams,
+            double initialStep = 0.01,
+            int maxGrowthSteps = 20)
+        {
+            double factor = 1.5;
+            double step = initialStep * Math.Abs(startValue == 0 ? 1.0 : startValue);
             double current = startValue;
             double previous = current;
-            int iter = 0;
 
-            while (iter++ < _maxIterations)
+            for (int i = 0; i < maxGrowthSteps; i++)
             {
                 current += direction * step;
 
                 double[] testParams = (double[])mleParams.Clone();
                 testParams[paramIndex] = current;
-
                 double logL = MaximizeWithFixedParameter(testParams, paramIndex);
 
                 if (logL < targetLogL)
                 {
-                    // Use bisection to refine
-                    return BisectionSearch(paramIndex, previous, current, targetLogL, mleParams);
+                    return direction == -1 ? (current, previous) : (previous, current);
                 }
 
                 previous = current;
+                step *= factor;
             }
 
-            throw new InvalidOperationException("Profile likelihood CI bound not found within iteration limit.");
+            throw new InvalidOperationException("Could not bracket likelihood drop.");
         }
+
 
         private double MaximizeWithFixedParameter(double[] fixedParams, int fixedIndex)
         {
@@ -121,7 +184,7 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                     return _mle.LogLikelihood(paramObj, _observations, _inputData);
                 });
 
-            var result = optimizer.Maximize(start);
+            var result = optimizer.MaximizeFromSingleStart(start);
 
             return result.ObjectiveValue;
         }

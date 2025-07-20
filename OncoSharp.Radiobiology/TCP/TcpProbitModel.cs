@@ -24,13 +24,19 @@ namespace OncoSharp.Radiobiology.TCP
         public double Gamma50 { get; }
 
 
-        public TcpProbitModel(double d50, double gamma50)
+        public TcpProbitModel(Geud2GyModel geudModel, double d50, double gamma50)
         {
+            GeudModel = geudModel;
             D50 = d50;
             Gamma50 = gamma50;
         }
 
-       public virtual ProbabilityValue ComputeTcp(List<DoseCloudPoint<EQD2Value>> points)
+        public virtual ProbabilityValue ComputeTcp(DoseCloudPoints<EQD2Value> points)
+        {
+            return ComputeTcp(points.VoxelDoses);
+        }
+
+       public virtual ProbabilityValue ComputeTcp(IReadOnlyList<DoseCloudPoint<EQD2Value>> points)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));
             

@@ -10,6 +10,8 @@ namespace OncoSharp.Statistics.Abstractions.Interfaces
     {
         TParameters FromArray(double[] parameters);
         double[] ToArray(TParameters parameters);
+
+        int GetParametersCount();
         string[] ParameterNames { get; }
     }
 }

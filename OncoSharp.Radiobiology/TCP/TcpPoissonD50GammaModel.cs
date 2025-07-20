@@ -63,6 +63,10 @@ namespace OncoSharp.Radiobiology.TCP
                 {
                     var voxelResponse = ComputeVoxelResponse(point.Dose);
                     tcp *= Math.Pow(voxelResponse.Value, volumeFraction);
+                    if (tcp.Value <= 1e-16)
+                    {
+                        return tcp;
+                    }
                 }
             }
 

@@ -44,5 +44,10 @@ namespace OncoSharp.Optimization.Algorithms.NLopt
             var result = _solver.Optimize(initialGuess, out var optVal);
             return new OptimizationResult(initialGuess, optVal ?? double.NaN, NloptResultMapper.MapToExitStatus(result));
         }
+
+        public OptimizationResult MaximizeFromSingleStart(double[] initialGuess)
+        {
+            return Maximize(initialGuess);
+        }
     }
 }

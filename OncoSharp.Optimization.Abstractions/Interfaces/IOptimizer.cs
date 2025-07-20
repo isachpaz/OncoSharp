@@ -16,5 +16,6 @@ namespace OncoSharp.Optimization.Abstractions.Interfaces
         IOptimizer SetLowerBounds(double[] lowerBounds);
         IOptimizer SetUpperBounds(double[] upperBounds);
         OptimizationResult Maximize(double[] initialGuess);
+        OptimizationResult MaximizeFromSingleStart(double[] initialGuess);
     }
 }

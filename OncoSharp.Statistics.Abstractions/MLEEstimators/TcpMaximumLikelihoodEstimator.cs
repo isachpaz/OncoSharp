@@ -11,9 +11,19 @@ using OncoSharp.Statistics.Abstractions.Helpers;
 namespace OncoSharp.Statistics.Abstractions.MLEEstimators
 {
     public abstract class TcpMaximumLikelihoodEstimator<TData, TParameters>
-        : MaximumLikelihoodEstimator<TData, TParameters>
-        where TParameters : new()
+        : MaximumLikelihoodEstimator<TData, TParameters> where TParameters : new()
     {
+        /// <summary>
+        /// 
+        /// If the patient responded or disease free (observation = true), it adds log(tcp) — higher TCP → better fit.
+        /// If the patient did not respond, or had a relapse (observation = false), it adds log(1 - tcp) — lower TCP → better fit.
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="observations"></param>
+        /// <param name="inputData"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         protected override double LogLikelihood(
             TParameters parameters,
             IList<bool> observations,

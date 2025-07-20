@@ -28,6 +28,11 @@ namespace OncoSharp.Statistics.Models.Tcp.Parameters
             return new[] { parameters.D50, parameters.Gamma };
         }
 
+        public int GetParametersCount()
+        {
+            return 2;
+        }
+
         public string[] ParameterNames => new[] { "D50", "Gamma" };
     }
 }

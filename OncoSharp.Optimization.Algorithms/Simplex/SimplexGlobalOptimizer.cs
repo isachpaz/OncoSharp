@@ -15,21 +15,26 @@ namespace OncoSharp.Optimization.Algorithms.Simplex
 {
     public class SimplexGlobalOptimizer : IOptimizer
     {
+        public int NumberOfMultipleStarts { get; }
         private Func<double[], double> _objectiveFunction = null;
+        private Func<double[], double> _pinnedObjectiveFunction;
         private double[] _lowerBounds = null;
         private double[] _upperBounds = null;
         private readonly double _convergenceTolerance = 1e-6;
         private readonly int _maximumIterations = 10000;
         private readonly ILogger _logger;
 
-        public SimplexGlobalOptimizer(ILogger logger = null)
+        public SimplexGlobalOptimizer(int numberOfMultipleStarts = 50, ILogger logger = null)
         {
+            NumberOfMultipleStarts = numberOfMultipleStarts;
             _logger = logger;
         }
 
         public IOptimizer SetMaxObjective(Func<double[], double> objective)
         {
             _objectiveFunction = objective ?? throw new ArgumentNullException(nameof(objective));
+            _pinnedObjectiveFunction = _objectiveFunction; // keeps a strong reference to avoid GC
+
             return this;
         }
 
@@ -63,19 +68,53 @@ namespace OncoSharp.Optimization.Algorithms.Simplex
 
             // Instantiate AdaptiveSimplex
             var adaptiveSimplex = new SimplexGlobalSolver.SimplexGlobalSolver(
-                _objectiveFunction,
+                _pinnedObjectiveFunction,
                 bounds,
                 _convergenceTolerance,
                 _maximumIterations,
                 _logger);
 
 
-            var solution = adaptiveSimplex.MaximizeWithMultiStart(50);
+            //var solution = adaptiveSimplex.MaximizeFromInitialGuess(initialGuess);
+            var solution = adaptiveSimplex.MaximizeWithMultiStart(NumberOfMultipleStarts);
 
-            return new OptimizationResult(solution.Points.ToArray(), solution.ObjectiveValue, NloptResultMapper.MapToExitStatus(solution.ExitReason));
+            return new OptimizationResult(solution.Points.ToArray(), solution.ObjectiveValue,
+                NloptResultMapper.MapToExitStatus(solution.ExitReason));
 
 
         }
 
+        public OptimizationResult MaximizeFromSingleStart(double[] initialGuess)
+        {
+            if (_objectiveFunction == null) throw new InvalidOperationException("Objective function must be set.");
+            if (_lowerBounds == null || _upperBounds == null)
+                throw new InvalidOperationException("Bounds must be set.");
+            if (initialGuess == null) throw new ArgumentNullException(nameof(initialGuess));
+            if (initialGuess.Length != _lowerBounds.Length || initialGuess.Length != _upperBounds.Length)
+                throw new ArgumentException("Initial guess must match the number of dimensions.");
+
+            // Convert bounds to tuple format
+            var bounds = new List<(double Min, double Max)>();
+            for (int i = 0; i < _lowerBounds.Length; i++)
+            {
+                bounds.Add((_lowerBounds[i], _upperBounds[i]));
+            }
+
+            // Instantiate AdaptiveSimplex
+            var adaptiveSimplex = new SimplexGlobalSolver.SimplexGlobalSolver(
+                _pinnedObjectiveFunction,
+                bounds,
+                _convergenceTolerance,
+                _maximumIterations,
+                _logger);
+
+
+            var solution = adaptiveSimplex.MaximizeFromInitialGuess(initialGuess);
+
+
+            return new OptimizationResult(solution.Points.ToArray(), solution.ObjectiveValue,
+                NloptResultMapper.MapToExitStatus(solution.ExitReason));
+
+        }
     }
 }

@@ -4,6 +4,7 @@
 // Commercial use requires a separate license.
 // See https://github.com/isachpaz/OncoSharp for more information.
 
+using System;
 using OncoSharp.Optimization.Abstractions.Models;
 
 namespace OncoSharp.Statistics.Abstractions.MLEEstimators
@@ -14,19 +15,32 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         public double[] StandardErrors { get; }
         public double? LogLikelihood { get; }
         public OptimizationResult OptResult { get; }
+        public double AIC { get; }
+        public double BIC { get; }
+        public double TotalObservations { get; }
+        public double ObservationsEventTrue { get; }
+        public double ObservationsEventFalse { get; }
 
         public MleResult(TParameters parameters, double[] standardErrors,
-            double? logLikelihood, OptimizationResult optResult)
+            double? logLikelihood, OptimizationResult optResult, double aic, double bic, int totalObservations,
+            double observationsEventTrue,
+            double observationsEventFalse)
         {
             Parameters = parameters;
             StandardErrors = standardErrors;
             LogLikelihood = logLikelihood;
             OptResult = optResult;
+            AIC = aic;
+            BIC = bic;
+            TotalObservations = totalObservations;
+            ObservationsEventTrue = observationsEventTrue;
+            ObservationsEventFalse = observationsEventFalse;
         }
 
         public MleResult(TParameters parameters, double logLikelihood)
-            : this(parameters, null, logLikelihood, null)
+            : this(parameters, null, logLikelihood, null, Double.NaN, Double.NaN, -1, -1,-1)
         {
         }
+
     }
 }
