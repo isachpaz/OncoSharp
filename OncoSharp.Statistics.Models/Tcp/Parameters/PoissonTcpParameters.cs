@@ -12,21 +12,21 @@ namespace OncoSharp.Statistics.Models.Tcp.Parameters
     public class PoissonTcpParameters : IParameterMapper<PoissonTcpParameters>
     {
         public double Alpha { get; set; }  // Linear LQ parameter [Gy⁻¹]
-        public double ClonogenDensity { get; set; }  // [clonogens/cm³]
+        public double LogClonogenDensity { get; set; }  // [clonogens/cm³]
 
         public override string ToString()
         {
-            return $"{nameof(Alpha)}: {Alpha}, {nameof(ClonogenDensity)}: {ClonogenDensity:E2}";
+            return $"{nameof(Alpha)}: {Alpha}, {nameof(LogClonogenDensity)}: {LogClonogenDensity:E2}";
         }
 
         public PoissonTcpParameters FromArray(double[] parameters)
         {
-            return new PoissonTcpParameters() { Alpha = parameters[0], ClonogenDensity = parameters[1] };
+            return new PoissonTcpParameters() { Alpha = parameters[0], LogClonogenDensity = parameters[1] };
         }
 
         public double[] ToArray(PoissonTcpParameters parameters)
         {
-            return new double[]{parameters.Alpha, parameters.ClonogenDensity};
+            return new double[]{parameters.Alpha, parameters.LogClonogenDensity };
         }
 
         public int GetParametersCount()
@@ -34,6 +34,6 @@ namespace OncoSharp.Statistics.Models.Tcp.Parameters
             return 2;
         }
 
-        public string[] ParameterNames => new String[] { "Alpha", "ClonogenDensity" };
+        public string[] ParameterNames => new String[] { "Alpha", "LogClonogenDensity" };
     }
 }

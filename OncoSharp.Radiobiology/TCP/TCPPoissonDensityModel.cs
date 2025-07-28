@@ -11,6 +11,7 @@ using OncoSharp.Core.Quantities.Probability;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using OncoSharp.Core.Quantities.Helpers.Maths;
 
 namespace OncoSharp.Radiobiology.TCP
 {
@@ -41,7 +42,7 @@ namespace OncoSharp.Radiobiology.TCP
                 response = 0.0;
             }
 
-            return ProbabilityValue.New(response);
+            return ProbabilityValue.New(MathUtils.Clamp(response, 0, 1.0));
         }
 
         public virtual ProbabilityValue ComputeTcp(IReadOnlyList<DoseCloudPoint<EQD0Value>>  points)

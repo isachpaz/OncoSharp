@@ -49,7 +49,7 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         /// Computes the Tumor Control Probability (TCP) for the given parameters and input data.
         /// This must be implemented by derived classes.
         /// </summary>
-        protected abstract double ComputeTcp(TParameters parameters, TData data);
+        public abstract double ComputeTcp(TParameters parameters, TData data);
 
     }
 }

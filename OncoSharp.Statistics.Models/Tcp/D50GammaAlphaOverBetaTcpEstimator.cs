@@ -52,7 +52,7 @@ namespace OncoSharp.Statistics.Models.Tcp
         }
 
 
-        protected override double ComputeTcp(D50GammaAlphaOverBetaTcpParameters parameters, IPlanItem planItem)
+        public override double ComputeTcp(D50GammaAlphaOverBetaTcpParameters parameters, IPlanItem planItem)
         {
             var structureId = StructureSelector(planItem);
             var points = planItem.CalculateEqd2DoseDistribution(structureId, parameters.AlphaOverBeta.Gy());

@@ -63,7 +63,7 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new double[] { Double.NaN, Double.NaN, Double.NaN };
         }
 
-        protected override double ComputeTcp(NiemierkoTcpParameters parameters, IPlanItem planItem)
+        public override double ComputeTcp(NiemierkoTcpParameters parameters, IPlanItem planItem)
         {
             var structureId = StructureSelector(planItem);
             Geud2GyModel geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);

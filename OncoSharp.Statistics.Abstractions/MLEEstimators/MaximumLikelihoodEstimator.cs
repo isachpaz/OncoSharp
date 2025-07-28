@@ -7,7 +7,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using OncoSharp.Optimization.Abstractions.Interfaces;
 using OncoSharp.Statistics.Abstractions.ConfidenceInterval;
 using OncoSharp.Statistics.Abstractions.Helpers;
@@ -155,6 +154,10 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
 
 
         // Explicit interface implementation — not visible on public API
+
+        double[] IMleInternals<TData, TParameters>.GetInitialParameters() =>
+            GetInitialParameters() ?? Enumerable.Repeat(double.NegativeInfinity, GetInitialParameters().Length).ToArray();
+
         double[] IMleInternals<TData, TParameters>.GetLowerBounds() =>
             GetLowerBounds() ?? Enumerable.Repeat(double.NegativeInfinity, GetInitialParameters().Length).ToArray();
 

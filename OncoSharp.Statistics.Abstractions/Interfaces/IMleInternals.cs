@@ -9,8 +9,9 @@ using OncoSharp.Optimization.Abstractions.Interfaces;
 
 namespace OncoSharp.Statistics.Abstractions.Interfaces
 {
-    internal interface IMleInternals<TData, TParameters>
+    public interface IMleInternals<TData, TParameters>
     {
+        double[] GetInitialParameters();
         double[] GetLowerBounds();
         double[] GetUpperBounds();
         double LogLikelihood(TParameters parameters, IList<bool> observations, IList<TData> inputData);

@@ -46,7 +46,7 @@ namespace OncoSharp.Statistics.Models.Tcp
         protected override double[] CalculateStandardErrors(double[] optimizedParams, double? negLogLik)
         {
             // Placeholder: should use numerical Hessian or observed Fisher Information Matrix
-            return new double[] { 0.1, 0.1, 0.05 };
+            return new double[] { Double.NaN, Double.NaN};
         }
 
 
@@ -57,17 +57,17 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override double[] GetInitialParameters()
         {
-            return new double[] { 0.002, 1e7 }; // Alpha, Beta, ClonogenDensity
+            return new double[] { 0.05, 1 }; // Alpha, Beta, ClonogenDensity
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.0, 1e3 }; // reasonable biological bounds
+            return new double[] { 0.01, 0 }; // reasonable biological bounds
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 2.0, 1e11 };
+            return new double[] { 0.5, 100000 };
         }
 
         protected override PoissonTcpParameters ConvertVectorToParameters(double[] x)
@@ -75,13 +75,13 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new PoissonTcpParameters
             {
                 Alpha = x[0],
-                ClonogenDensity = x[1]
+                LogClonogenDensity = x[1]
             };
         }
 
-        protected override double ComputeTcp(PoissonTcpParameters parameters, IPlanItem planItem)
+        public override double ComputeTcp(PoissonTcpParameters parameters, IPlanItem planItem)
         {
-            var model = new TcpPoissonDensityModel(CellDensity.InCells_Per_CM3(parameters.ClonogenDensity), parameters.Alpha);
+            var model = new TcpPoissonDensityModel(CellDensity.InCells_Per_CM3(Math.Log10(parameters.LogClonogenDensity)), parameters.Alpha);
 
             var structureId = StructureSelector(planItem);
             var points = planItem.CalculateEqd0DoseDistribution(structureId, AlphaOverBeta);

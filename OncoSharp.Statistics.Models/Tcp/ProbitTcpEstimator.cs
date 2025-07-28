@@ -38,6 +38,7 @@ namespace OncoSharp.Statistics.Models.Tcp
                 base._parameterMapper = new ProbitTcpParameters();
             }
         }
+
         protected override IOptimizer CreateSolver(int parameterCount)
         {
             return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
@@ -45,12 +46,12 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override double[] GetInitialParameters()
         {
-            return new double[] { 0.0, 0.0, 0.0 };
+            return new double[] { 0.0, 0.0, -8.67 };
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.0, 0.0, -200.0 };
+            return new double[] { 0.0, 0.0, -200 };
         }
 
         protected override double[] GetUpperBounds()
@@ -63,7 +64,7 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new double[] { Double.NaN, Double.NaN, Double.NaN };
         }
 
-        protected override double ComputeTcp(ProbitTcpParameters parameters, IPlanItem planItem)
+        public override double ComputeTcp(ProbitTcpParameters parameters, IPlanItem planItem)
         {
             var structureId = StructureSelector(planItem);
             Geud2GyModel geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);
