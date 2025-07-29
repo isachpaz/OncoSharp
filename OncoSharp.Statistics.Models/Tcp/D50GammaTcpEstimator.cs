@@ -40,7 +40,7 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override double[] GetInitialParameters()
         {
-            return new[] { 0.0, 7.0 };
+            return new[] { 37.77, 3.56678 };
         }
 
 

@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GliaaAnalysisApp", "GliaaAn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models.Tests", "OncoSharp.Statistics.Models.Tests\OncoSharp.Statistics.Models.Tests.csproj", "{CC4E96C8-9494-4453-821B-0235B60F8B1A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Identifiability", "OncoSharp.Statistics.Identifiability\OncoSharp.Statistics.Identifiability.csproj", "{A8237D5B-E96E-45D8-9574-65F161742F85}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models.Diagnostics", "OncoSharp.Statistics.Models.Diagnostics\OncoSharp.Statistics.Models.Diagnostics.csproj", "{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,10 +111,10 @@ Global
 		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC4E96C8-9494-4453-821B-0235B60F8B1A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A8237D5B-E96E-45D8-9574-65F161742F85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A8237D5B-E96E-45D8-9574-65F161742F85}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A8237D5B-E96E-45D8-9574-65F161742F85}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A8237D5B-E96E-45D8-9574-65F161742F85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
