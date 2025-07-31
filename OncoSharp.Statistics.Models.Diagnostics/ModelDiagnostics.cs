@@ -7,14 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HosmerLemeshowTest;
+using HLTest.Core;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 
 namespace OncoSharp.Statistics.Models.Diagnostics
 {
     public static class ModelDiagnostics
     {
-        private static readonly HosmerLemeshowTest.HosmerLemeshowTest _hosmerLemeshowTest = new HosmerLemeshowTest.HosmerLemeshowTest();
+        private static readonly HosmerLemeshowTest _hosmerLemeshowTest = new HosmerLemeshowTest();
 
         /// <summary>
         /// Performs the Hosmer-Lemeshow goodness-of-fit test for binary outcomes.
@@ -22,14 +22,14 @@ namespace OncoSharp.Statistics.Models.Diagnostics
         /// <param name="predictedProbabilities">Predicted probabilities from the model.</param>
         /// <param name="actualOutcomes">Observed outcomes as 0/1 integer array.</param>
         /// <returns>HosmerLemeshowResult containing test statistics.</returns>
-        public static HosmerLemeshowResult CalculateHosmerLemeshow(double[] predictedProbabilities, int[] actualOutcomes)
+        public static HosmerLemeshowResult CalculateHosmerLemeshow(double[] predictedProbabilities, int[] actualOutcomes, int numGroups = 10)
         {
             if (predictedProbabilities == null) throw new ArgumentNullException(nameof(predictedProbabilities));
             if (actualOutcomes == null) throw new ArgumentNullException(nameof(actualOutcomes));
             if (predictedProbabilities.Length != actualOutcomes.Length)
                 throw new ArgumentException("Predicted and actual arrays must be the same length.");
 
-            return _hosmerLemeshowTest.CalculateHosmerLemeshow(predictedProbabilities, actualOutcomes);
+            return _hosmerLemeshowTest.CalculateHosmerLemeshow(predictedProbabilities, actualOutcomes, numGroups);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace OncoSharp.Statistics.Models.Diagnostics
 
             var actualOutcomes = observations.Select(b => b ? 1 : 0).ToArray();
 
-            return CalculateHosmerLemeshow(predictedProbabilities, actualOutcomes);
+            return CalculateHosmerLemeshow(predictedProbabilities, actualOutcomes,8);
         }
     }
 }

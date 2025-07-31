@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="HosmerLemeshowTest" Version="1.0.0" />
+    <PackageReference Include="HosmerLemeshowTest" Version="2.0.0" />
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
 

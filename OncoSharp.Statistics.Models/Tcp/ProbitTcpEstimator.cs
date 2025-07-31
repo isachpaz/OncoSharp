@@ -46,17 +46,17 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override double[] GetInitialParameters()
         {
-            return new double[] { 0.0, 0.0, -8.67 };
+            return new double[] { 0.0, 0.0, -10.0 };
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.0, 0.0, -200 };
+            return new double[] { 0.0, 0.0, -10.0 };
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 200, 30, 0.0 };
+            return new double[] { 200, 30, -10.0 };
         }
 
         protected override double[] CalculateStandardErrors(double[] optimizedParams, double? logLikelihood)

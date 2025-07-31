@@ -57,17 +57,17 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override double[] GetInitialParameters()
         {
-            return new double[] { 0.05, 1 }; // Alpha, Beta, ClonogenDensity
+            return new double[] { 0.12, 1 }; // Alpha, Beta, Log10ClonogenDensity
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.01, 0 }; // reasonable biological bounds
+            return new double[] { 0.12, 0 }; // reasonable biological bounds
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 0.5, 100000 };
+            return new double[] { 0.12, 10 };
         }
 
         protected override PoissonTcpParameters ConvertVectorToParameters(double[] x)
@@ -75,13 +75,15 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new PoissonTcpParameters
             {
                 Alpha = x[0],
-                LogClonogenDensity = x[1]
+                Log10ClonogenDensity = x[1]
             };
         }
 
         public override double ComputeTcp(PoissonTcpParameters parameters, IPlanItem planItem)
         {
-            var model = new TcpPoissonDensityModel(CellDensity.InCells_Per_CM3(Math.Log10(parameters.LogClonogenDensity)), parameters.Alpha);
+            var model = new TcpPoissonDensityModel(
+                CellDensity.InCells_Per_CM3(Math.Pow(10,parameters.Log10ClonogenDensity)),
+                parameters.Alpha);
 
             var structureId = StructureSelector(planItem);
             var points = planItem.CalculateEqd0DoseDistribution(structureId, AlphaOverBeta);
