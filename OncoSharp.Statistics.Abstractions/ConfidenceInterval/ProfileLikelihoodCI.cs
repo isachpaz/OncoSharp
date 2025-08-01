@@ -39,6 +39,13 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double mleValue,
             double[] mleParams)
         {
+            var lower1 = _mle.GetLowerBounds()[paramIndex];
+            var upper1 = _mle.GetUpperBounds()[paramIndex];
+            if (Math.Abs(upper1 - lower1) < 1e12)
+            {
+                return (lower1, upper1);
+            }
+
             double bestLogL = _mle.LogLikelihood(
                 _mle.ConvertVectorToParameters(mleParams),
                 _observations,
