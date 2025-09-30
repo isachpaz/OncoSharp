@@ -4,16 +4,17 @@
 // Commercial use requires a separate license.
 // See https://github.com/isachpaz/OncoSharp for more information.
 
+using OncoSharp.Core.Quantities.Helpers.Maths;
 using OncoSharp.Optimization.Abstractions.Interfaces;
 using OncoSharp.Optimization.Algorithms.Simplex;
+using OncoSharp.RTDomainModel;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Ntcp.Parameters;
 using System;
-using OncoSharp.Core.Quantities.Helpers.Maths;
 
 namespace OncoSharp.Statistics.Models.Ntcp
 {
-    public class LkbNtcpEstimator : NtcpMaximumLikelihoodEstimator<(double EUD, double Volume), LkbNtcpParameters>
+    public class LkbNtcpEstimator : NtcpMaximumLikelihoodEstimator<IPlanItem, LkbNtcpParameters>
     {
         protected override IOptimizer CreateSolver(int parameterCount)
         {
@@ -38,7 +39,7 @@ namespace OncoSharp.Statistics.Models.Ntcp
             return new double[optimizedParams.Length];
         }
 
-        protected override double ComputeNtcp(LkbNtcpParameters parameters, (double EUD, double Volume) data)
+        protected  double ComputeNtcp(LkbNtcpParameters parameters, (double EUD, double Volume) data)
         {
             double eud = data.EUD;
             double td50 = parameters.TD50;
@@ -46,6 +47,11 @@ namespace OncoSharp.Statistics.Models.Ntcp
 
             double t = (eud - td50) / (m * td50);
             return 0.5 * (1.0 + MathUtils.Erf(t / Math.Sqrt(2.0)));
+        }
+
+        protected override double ComputeNtcp(LkbNtcpParameters parameters, IPlanItem data)
+        {
+            throw new NotImplementedException();
         }
     }
 }
