@@ -406,3 +406,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 GliaaAnalysisApp/
+
+MattoNtcpApp/
+
+FmisoTcpApp/

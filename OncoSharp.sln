@@ -41,6 +41,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OncoSharp.Statistics.Models.Diagnostics", "OncoSharp.Statistics.Models.Diagnostics\OncoSharp.Statistics.Models.Diagnostics.csproj", "{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MattoNtcpApp", "MattoNtcpApp\MattoNtcpApp.csproj", "{64E049E9-19B1-4403-A7EB-304AE3782BB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FmisoTcpApp", "FmisoTcpApp\FmisoTcpApp.csproj", "{F985A6AF-18CF-491D-9AAA-C96623A94B9C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +119,14 @@ Global
 		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACD46422-210B-49CF-B22B-C53E3DD9CA5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64E049E9-19B1-4403-A7EB-304AE3782BB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64E049E9-19B1-4403-A7EB-304AE3782BB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64E049E9-19B1-4403-A7EB-304AE3782BB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64E049E9-19B1-4403-A7EB-304AE3782BB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F985A6AF-18CF-491D-9AAA-C96623A94B9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F985A6AF-18CF-491D-9AAA-C96623A94B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F985A6AF-18CF-491D-9AAA-C96623A94B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F985A6AF-18CF-491D-9AAA-C96623A94B9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -125,6 +137,8 @@ Global
 		{81E56DF8-D842-4FA6-B734-47044A73B804} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{041B4DA3-98DC-4A24-9FBF-D31B197191D3} = {52258D48-5C20-4CA2-A656-DEECD40D0EA7}
 		{CC4E96C8-9494-4453-821B-0235B60F8B1A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{64E049E9-19B1-4403-A7EB-304AE3782BB6} = {52258D48-5C20-4CA2-A656-DEECD40D0EA7}
+		{F985A6AF-18CF-491D-9AAA-C96623A94B9C} = {52258D48-5C20-4CA2-A656-DEECD40D0EA7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF0FE4D9-83F4-405F-9EF1-623F8DCBE8B8}
