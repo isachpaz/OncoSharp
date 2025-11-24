@@ -171,6 +171,15 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
         private double MaximizeWithFixedParameter(double[] fixedParams, int fixedIndex)
         {
             int paramCount = fixedParams.Length;
+
+            // Special case: only one parameter in the model, and it's fixed.
+            // No free parameters -> no optimization; just evaluate the log-likelihood.
+            if (paramCount == 1)
+            {
+                var paramObjSingle = _mle.ConvertVectorToParameters(fixedParams);
+                return _mle.LogLikelihood(paramObjSingle, _observations, _inputData);
+            }
+
             var optimizer = _mle.CreateSolver(paramCount - 1);
 
             double[] lower = _mle.GetLowerBounds() ?? Enumerable.Repeat(double.NegativeInfinity, paramCount).ToArray();
