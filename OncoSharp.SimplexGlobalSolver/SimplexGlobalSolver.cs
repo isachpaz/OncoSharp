@@ -49,14 +49,20 @@ namespace OncoSharp.SimplexGlobalSolver
             }
 
             _logger?.LogInformation("SimplexGlobalSolver initialized successfully.");
+            
         }
 
         public SimplexResult MaximizeWithMultiStart(int numInitialGuesses)
         {
             var initialGuesses = HammersleySequence.GeneratePoints(numInitialGuesses, _bounds);
+            _logger.LogDebug(
+                $"SimplexGlobalSolver - initialGuesses: {initialGuesses.Count}, " +
+                $"Items: {string.Join(" | ", initialGuesses.Select(arr => $"[{string.Join(", ", arr)}]"))}"
+            );
 
             foreach (var guess in initialGuesses)
             {
+                _logger.LogDebug($"SimplexGlobalSolver - MaximizeFromInitialGuess with [{string.Join(", ", guess)}]");
                 MaximizeFromInitialGuess(guess);
             }
 
@@ -91,8 +97,14 @@ namespace OncoSharp.SimplexGlobalSolver
             _delegatePins[solver] = func; // ❗ Strong reference
 
             var result = solver.Optimize(initialGuess, out double? minf);
+            _logger.LogDebug(
+                $"Simplex Solve → InitialGuess: [{string.Join(", ", initialGuess)}], " +
+                $"Result: [{string.Join(", ", result)}], MinF: {(minf?.ToString() ?? "null")}");
+
             if (minf != null)
+            {
                 _solutions.Add(new SimplexResult(initialGuess, minf.Value, result));
+            }
 
             _delegatePins.TryRemove(solver, out _); // 🔓 Clean up
 
