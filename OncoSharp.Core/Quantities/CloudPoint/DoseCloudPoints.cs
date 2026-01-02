@@ -29,9 +29,12 @@ namespace OncoSharp.Core.Quantities.CloudPoint
             _voxelDoses = new List<DoseCloudPoint<TDose>>(voxelDoses).AsReadOnly();
             _totalVolume = new Lazy<VolumeValue>(() =>
                 new VolumeValue(_voxelDoses.Sum(p=>p.Volume.Value), volumeUnits));
+            var d1 = voxelDoses.FirstOrDefault().Dose;
+            this.DoseUnit = d1.GetUnits();
         }
 
         public IReadOnlyList<DoseCloudPoint<TDose>> VoxelDoses => _voxelDoses;
         public VolumeValue TotalVolume => _totalVolume.Value;
+        public DoseUnit DoseUnit { get; }
     }
 }

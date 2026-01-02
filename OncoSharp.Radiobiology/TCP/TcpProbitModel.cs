@@ -31,13 +31,11 @@ namespace OncoSharp.Radiobiology.TCP
             Gamma50 = gamma50;
         }
 
-        public virtual ProbabilityValue ComputeTcp(DoseCloudPoints<EQD2Value> points)
-        {
-            return ComputeTcp(points.VoxelDoses);
-        }
+       public virtual ProbabilityValue ComputeTcp(DoseCloudPoints<EQD2Value> points)
+       {
+           if (Math.Abs(D50) < 1e-3)
+               return ProbabilityValue.Zero;
 
-       public virtual ProbabilityValue ComputeTcp(IReadOnlyList<DoseCloudPoint<EQD2Value>> points)
-        {
             if (points == null) throw new ArgumentNullException(nameof(points));
             
             var geud2Gy = GeudModel.Calculate(points);
