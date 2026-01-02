@@ -4,9 +4,12 @@
 // Commercial use requires a separate license.
 // See https://github.com/isachpaz/OncoSharp for more information.
 
+using NLoptNet;
 using OncoSharp.Core.Quantities.Dose;
 using OncoSharp.Core.Quantities.Extensions;
 using OncoSharp.Optimization.Abstractions.Interfaces;
+using OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt;
+using OncoSharp.Optimization.Algorithms.NLopt;
 using OncoSharp.Optimization.Algorithms.Simplex;
 using OncoSharp.Radiobiology.GEUD;
 using OncoSharp.Radiobiology.TCP;
@@ -14,6 +17,7 @@ using OncoSharp.RTDomainModel;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Tcp.Parameters;
 using System;
+using System.Diagnostics;
 
 namespace OncoSharp.Statistics.Models.Tcp
 {
@@ -41,7 +45,9 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override IOptimizer CreateSolver(int parameterCount)
         {
-            return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            // return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            //return new NLoptOptimizer(NLoptAlgorithm.GN_ISRES, parameterCount, 1e-12, 10_000);
+            return new NloptMultiStartLocalOptimizer();
         }
 
         protected override double[] GetInitialParameters()
@@ -66,11 +72,20 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         public override double ComputeTcp(ProbitTcpParameters parameters, IPlanItem planItem)
         {
+            if (parameters.D50 < 1e-3)
+            {
+                return 0;
+            }
+
             var structureId = StructureSelector(planItem);
             Geud2GyModel geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);
             var model = new TcpProbitModel( geudModel, parameters.D50, parameters.Gamma50);
             var points = planItem.CalculateEqd2DoseDistribution(structureId, AlphaOverBeta);
             var tcp = model.ComputeTcp(points);
+            if (tcp.Value < 0.2)
+            {
+                Debug.WriteLine("");
+            }
             return tcp.Value;
         }
     }

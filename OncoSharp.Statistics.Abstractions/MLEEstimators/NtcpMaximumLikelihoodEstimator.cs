@@ -17,8 +17,8 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
     {
         /// <summary>
         /// 
-        /// observations[i] == true → the patient had a complication (tox event).
-        /// observations[i] == false → the patient did not have a complication.
+        /// observations[i] == true = 1 → the patient had a complication (tox event).
+        /// observations[i] == false = 0 → the patient did not have a complication.
         /// 
         /// </summary>
         /// <param name="parameters"></param>

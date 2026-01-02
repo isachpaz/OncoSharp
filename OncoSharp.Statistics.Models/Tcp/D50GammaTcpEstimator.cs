@@ -6,13 +6,14 @@
 
 using OncoSharp.Core.Quantities.Dose;
 using OncoSharp.Optimization.Abstractions.Interfaces;
+using OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt;
+using OncoSharp.Optimization.Algorithms.Simplex;
 using OncoSharp.Radiobiology.TCP;
+using OncoSharp.RTDomainModel;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Tcp.Parameters;
 using System;
 using System.Linq;
-using OncoSharp.Optimization.Algorithms.Simplex;
-using OncoSharp.RTDomainModel;
 
 namespace OncoSharp.Statistics.Models.Tcp
 {
@@ -77,7 +78,8 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override IOptimizer CreateSolver(int parameterCount)
         {
-            return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            // return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            return new NloptMultiStartLocalOptimizer();
         }
 
       

@@ -29,13 +29,14 @@ namespace OncoSharp.Radiobiology.GEUD
             return new Geud2GyModel(alphaVolumeEffect);
         }
 
-        public EQD2Value Calculate(IReadOnlyList<DoseCloudPoint<EQD2Value>> points)
+        public EQD2Value Calculate(DoseCloudPoints<EQD2Value> points)
         {
             var items = points;
-            var totalVolume = items.Select(x => x.Volume).Aggregate((v1, v2) => v1 + v2);
-            var units = this.GetDoseUnit(items);
+            //var totalVolume = items.Select(x => x.Volume).Aggregate((v1, v2) => v1 + v2);
+            var totalVolume = points.TotalVolume;
+            var units = points.DoseUnit;
             double gEUD = 0.0;
-            foreach (var item in items)
+            foreach (var item in items.VoxelDoses)
             {
                 var dose = item.Dose;
                 var volume = item.Volume;

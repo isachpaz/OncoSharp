@@ -37,6 +37,9 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
             {
                 double tcp = ComputeTcp(parameters, inputData[i]);
 
+                if (double.IsNaN(tcp) || double.IsInfinity(tcp))
+                    return double.NegativeInfinity;
+
                 tcp = MathUtils.Clamp(tcp, 1e-12, 1.0 - 1e-12);
 
                 logLik += observations[i] ? Math.Log(tcp) : Math.Log(1.0 - tcp);
