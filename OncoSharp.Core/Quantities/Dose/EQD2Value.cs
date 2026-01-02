@@ -268,10 +268,8 @@ namespace OncoSharp.Core.Quantities.Dose
             return Value;
         }
 
-        DoseUnit IQuantityGetters<EQD2Value, DoseUnit>.GetUnits()
-        {
-            throw new NotImplementedException();
-        }
+        DoseUnit IQuantityGetters<EQD2Value, DoseUnit>.GetUnits() => Unit;
+        
 
 
         public string GetUnits() => this.UnitAsString;
