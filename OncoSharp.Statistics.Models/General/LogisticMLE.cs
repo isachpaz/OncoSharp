@@ -27,6 +27,11 @@ namespace OncoSharp.Statistics.Models.General
             return new SimplexGlobalOptimizer();
         }
 
+        protected override (bool isNeeded, double penalityValue) Penalize(LogisticParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override double[] GetInitialParameters()
         {
             return new[] { 0.0, 0.0 }; // Start with zero coefficients

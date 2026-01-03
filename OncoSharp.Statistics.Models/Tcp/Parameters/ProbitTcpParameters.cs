@@ -5,6 +5,7 @@
 // See https://github.com/isachpaz/OncoSharp for more information.
 
 using OncoSharp.Statistics.Abstractions.Interfaces;
+using System;
 
 namespace OncoSharp.Statistics.Models.Tcp.Parameters
 {
@@ -30,11 +31,33 @@ namespace OncoSharp.Statistics.Models.Tcp.Parameters
             return new ProbitTcpParameters(parameters[0], parameters[1], parameters[2]);
         }
 
+        //public ProbitTcpParameters FromArray(double[] parameters)
+        //{
+        //    return new ProbitTcpParameters(
+        //        Math.Exp(parameters[0]),   // u -> D50
+        //        Math.Exp(parameters[1]),   // v -> Gamma50
+        //        parameters[2]);            // AlphaVolumeEffect unchanged (or fixed)
+        //}
+
 
         public double[] ToArray(ProbitTcpParameters parameters)
         {
             return new double[] { parameters.D50, parameters.Gamma50, parameters.AlphaVolumeEffect };
         }
+
+        private const double MinPos = 1e-300; // prevents -Infinity
+
+        //public double[] ToArray(ProbitTcpParameters parameters)
+        //{
+        //    return new double[]
+        //    {
+        //        Math.Log(Math.Max(parameters.D50, MinPos)),
+        //        Math.Log(Math.Max(parameters.Gamma50, MinPos)),
+        //        parameters.AlphaVolumeEffect
+        //    };
+        //}
+
+
 
         public int GetParametersCount()
         {

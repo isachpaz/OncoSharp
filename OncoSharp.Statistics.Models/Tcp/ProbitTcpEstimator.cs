@@ -50,19 +50,34 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new NloptMultiStartLocalOptimizer();
         }
 
-        protected override double[] GetInitialParameters()
+        private const double BadLL = -1e100;
+
+        protected override (bool isNeeded, double penalityValue) Penalize(ProbitTcpParameters parameters)
         {
-            return new double[] { 0.0, 0.0, -10.0 };
+            if (parameters.D50 <= 0.0 ||
+                parameters.Gamma50 < 0.0)
+                return (true, BadLL);
+
+            return (false, Double.NaN);
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.0, 0.0, -10.0 };
+            return new double[] { 1e-3, 0.0, -10.0 };
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 200, 30, -10.0 };
+            return new double[] { 200.0, 10, -10.0 };
+        }
+
+        protected override double[] GetInitialParameters()
+        {
+            
+            double d50Init = 50.0;
+            double gammaInit = 2.0;
+            return new double[] { d50Init, gammaInit, -10.0 };
+            
         }
 
         protected override double[] CalculateStandardErrors(double[] optimizedParams, double? logLikelihood)
@@ -72,10 +87,14 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         public override double ComputeTcp(ProbitTcpParameters parameters, IPlanItem planItem)
         {
-            if (parameters.D50 < 1e-3)
-            {
-                return 0;
-            }
+            //if (parameters.D50 < 1e-3)
+            //{
+            //    return 0;
+            //}
+
+            if (parameters.D50 <= 0.0) return 0.5; // or return 0.0, but better is penalize in LL
+            if (parameters.Gamma50 < 0.0) return 0.5;
+
 
             var structureId = StructureSelector(planItem);
             Geud2GyModel geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);

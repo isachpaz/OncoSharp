@@ -21,6 +21,11 @@ namespace OncoSharp.Statistics.Models.Ntcp
             return new SimplexGlobalOptimizer();
         }
 
+        protected override (bool isNeeded, double penalityValue) Penalize(LkbNtcpParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override double[] GetInitialParameters() => new[] { 50.0, 0.2, 0.5 };
 
         protected override double[] GetLowerBounds() => new[] { 1.0, 0.01, 0.01 };

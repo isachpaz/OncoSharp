@@ -107,6 +107,8 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         /// </summary>
         protected abstract IOptimizer CreateSolver(int parameterCount);
 
+        protected abstract (bool isNeeded, double penalityValue) Penalize(TParameters parameters);
+        
         /// <summary>
         /// Returns the initial parameter vector for optimization.
         /// </summary>
@@ -149,7 +151,7 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
 
         protected IParameterMapper<TParameters> _parameterMapper = null;
 
-        protected virtual IParameterMapper<TParameters> ParameterMapper =>
+        public virtual IParameterMapper<TParameters> ParameterMapper =>
             _parameterMapper ?? (_parameterMapper = new ReflectionParameterMapper<TParameters>());
 
 

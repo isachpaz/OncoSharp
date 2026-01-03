@@ -43,6 +43,11 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
         }
 
+        protected override (bool isNeeded, double penalityValue) Penalize(NiemierkoTcpParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override double[] GetInitialParameters()
         {
             return new double[] { 0.0, 0.0, -10.0 };

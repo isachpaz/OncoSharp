@@ -35,6 +35,11 @@ namespace OncoSharp.Statistics.Models.Tcp
             }
         }
 
+        protected override (bool isNeeded, double penalityValue) Penalize(D50GammaAlphaOverBetaTcpParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override double[] GetInitialParameters()
         {
             return new[] { 0.0, 0.0, 1.0 };

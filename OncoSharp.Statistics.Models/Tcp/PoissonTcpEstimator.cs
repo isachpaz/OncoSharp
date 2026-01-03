@@ -55,6 +55,11 @@ namespace OncoSharp.Statistics.Models.Tcp
             return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
         }
 
+        protected override (bool isNeeded, double penalityValue) Penalize(PoissonTcpParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
+
         protected override double[] GetInitialParameters()
         {
             return new double[] { 0.12, 1 }; // Alpha, Beta, Log10ClonogenDensity

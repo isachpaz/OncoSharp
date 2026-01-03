@@ -33,9 +33,7 @@ namespace OncoSharp.Radiobiology.TCP
 
        public virtual ProbabilityValue ComputeTcp(DoseCloudPoints<EQD2Value> points)
        {
-           if (Math.Abs(D50) < 1e-3)
-               return ProbabilityValue.Zero;
-
+           
             if (points == null) throw new ArgumentNullException(nameof(points));
             
             var geud2Gy = GeudModel.Calculate(points);

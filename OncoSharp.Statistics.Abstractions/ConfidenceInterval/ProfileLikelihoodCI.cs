@@ -121,14 +121,25 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double targetLogL,
             double[] mleParams)
         {
+            var lower = _mle.GetLowerBounds();
+            var upper = _mle.GetUpperBounds();
+
+            double lb = lower[paramIndex];
+            double ub = upper[paramIndex];
+
+            // If fixed parameter is constant, return it (you already handle this earlier)
+            // Ensure startValue is inside bounds
+            startValue = Math.Max(lb, Math.Min(ub, startValue));
+
             try
             {
-                var (a, b) = BracketLogLikelihoodDrop(direction, startValue, paramIndex, targetLogL, mleParams);
-                return BisectionSearch(paramIndex, a, b, targetLogL, mleParams, tol: 1e-6, maxIter: _maxIterations);
+                var (a, b) = BracketLogLikelihoodDrop(direction, startValue, paramIndex, targetLogL, mleParams, lb, ub);
+                return BisectionSearch(paramIndex, a, b, targetLogL, mleParams, lb, ub, tol: 1e-6, maxIter: _maxIterations);
             }
             catch (InvalidOperationException)
             {
-                return direction == -1 ? double.NegativeInfinity : double.PositiveInfinity;
+                // If we can't bracket before hitting a bound, the CI hits the bound.
+                return direction == -1 ? lb : ub;
             }
         }
 
@@ -139,11 +150,14 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             int paramIndex,
             double targetLogL,
             double[] mleParams,
+            double lowerFixed,
+            double upperFixed,
             double initialStep = 0.01,
             int maxGrowthSteps = 20)
         {
             double factor = 1.5;
             double step = initialStep * Math.Abs(startValue == 0 ? 1.0 : startValue);
+
             double current = startValue;
             double previous = current;
 
@@ -151,14 +165,22 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             {
                 current += direction * step;
 
+                // Clamp / stop at bounds
+                if (current < lowerFixed) current = lowerFixed;
+                if (current > upperFixed) current = upperFixed;
+
                 double[] testParams = (double[])mleParams.Clone();
                 testParams[paramIndex] = current;
+
                 double logL = MaximizeWithFixedParameter(testParams, paramIndex);
 
                 if (logL < targetLogL)
-                {
                     return direction == -1 ? (current, previous) : (previous, current);
-                }
+
+                // If we've hit a bound and still haven't dropped, we can't go further
+                if ((direction == -1 && current <= lowerFixed) ||
+                    (direction == 1 && current >= upperFixed))
+                    throw new InvalidOperationException("Reached bound without bracketing likelihood drop.");
 
                 previous = current;
                 step *= factor;
@@ -223,12 +245,22 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double high,
             double targetLogL,
             double[] mleParams,
+            double lowerFixed,
+            double upperFixed,
             double tol = 1e-6,
             int maxIter = 50)
         {
+            // Clamp endpoints
+            low = Math.Max(lowerFixed, Math.Min(upperFixed, low));
+            high = Math.Max(lowerFixed, Math.Min(upperFixed, high));
+
             for (int i = 0; i < maxIter; i++)
             {
-                double mid = (low + high) / 2;
+                double mid = 0.5 * (low + high);
+
+                if (mid < lowerFixed) mid = lowerFixed;
+                if (mid > upperFixed) mid = upperFixed;
+
                 double[] testParams = (double[])mleParams.Clone();
                 testParams[paramIndex] = mid;
 
@@ -243,7 +275,7 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                     high = mid;
             }
 
-            return (low + high) / 2;
+            return 0.5 * (low + high);
         }
 
         private static double ChiSquaredDelta(double confidenceLevel)
