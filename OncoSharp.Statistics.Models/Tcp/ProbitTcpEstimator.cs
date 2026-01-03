@@ -18,6 +18,9 @@ using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Tcp.Parameters;
 using System;
 using System.Diagnostics;
+using OncoSharp.Statistics.Abstractions.Interfaces;
+using MathNet.Numerics.Distributions;
+
 
 namespace OncoSharp.Statistics.Models.Tcp
 {
@@ -26,85 +29,137 @@ namespace OncoSharp.Statistics.Models.Tcp
         public DoseValue AlphaOverBeta { get; }
         public int NumberOfMultipleStarts { get; }
 
-        /// <summary>
-        /// Function to extract the structure ID from the given plan item.
-        /// Default is a constant "GTV".
-        /// </summary>
         public Func<IPlanItem, string> StructureSelector { get; set; } = _ => "GTV";
 
+        private readonly bool _useLogSpace;
 
-        public ProbitTcpEstimator(DoseValue alphaOverBeta, int numberOfMultipleStarts)
+        private const double BadLL = -1e100;
+        private const double MinGammaPos = 1e-6; // for log-space only
+
+        public ProbitTcpEstimator(DoseValue alphaOverBeta, int numberOfMultipleStarts, bool useLogSpace)
         {
             AlphaOverBeta = alphaOverBeta;
             NumberOfMultipleStarts = numberOfMultipleStarts;
-            if (base._parameterMapper == null)
-            {
-                base._parameterMapper = new ProbitTcpParameters();
-            }
+            _useLogSpace = useLogSpace;
+            
+            // Always set mapper explicitly (avoid stale base mapper)
+            base._parameterMapper = useLogSpace
+                ? (IParameterMapper<ProbitTcpParameters>)new LogSpaceProbitTcpMapper()
+                : (IParameterMapper<ProbitTcpParameters>)new ProbitTcpParameters();
         }
 
         protected override IOptimizer CreateSolver(int parameterCount)
         {
-            // return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
-            //return new NLoptOptimizer(NLoptAlgorithm.GN_ISRES, parameterCount, 1e-12, 10_000);
             return new NloptMultiStartLocalOptimizer();
         }
 
-        private const double BadLL = -1e100;
-
         protected override (bool isNeeded, double penalityValue) Penalize(ProbitTcpParameters parameters)
         {
-            if (parameters.D50 <= 0.0 ||
-                parameters.Gamma50 < 0.0)
-                return (true, BadLL);
+            // parameters here are ALWAYS physical (after ConvertVectorToParameters)
+            if (parameters.D50 <= 0.0) return (true, BadLL);
+            if (parameters.Gamma50 < 0.0) return (true, BadLL); // or <= 0 if you require strictly positive
 
-            return (false, Double.NaN);
+            return (false, double.NaN);
         }
+
+        public (double Lr, double PBoundary, double LogLikNull) BoundaryLrtGamma50EqualsZero(double logLikFull, int n)
+        {
+            // Null: Gamma50 = 0 => TCP = 0.5 constant in YOUR model
+            double logLikNull = n * Math.Log(0.5);
+
+            double lr = 2.0 * (logLikFull - logLikNull);
+            if (lr < 0.0) lr = 0.0;
+
+            // boundary mixture: 0.5*ChiSq0 + 0.5*ChiSq1
+            double pWilks = 1.0 - ChiSquared.CDF(1, lr);
+            double pBoundary = 0.5 * pWilks;
+
+            return (lr, pBoundary, logLikNull);
+        }
+
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 1e-3, 0.0, -10.0 };
+            if (_useLogSpace)
+            {
+                return new[]
+                {
+                    Math.Log(1e-3),             // log(D50)
+                    Math.Log(MinGammaPos),      // log(Gamma50)  (must be > 0)
+                    -10.0
+                };
+            }
+
+            return new[]
+            {
+                1e-3,   // D50
+                0.0,    // Gamma50 (allow 0 in physical mode)
+                -10.0
+            };
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 200.0, 10, -10.0 };
+            if (_useLogSpace)
+            {
+                return new[]
+                {
+                    Math.Log(200.0),  // log(D50)
+                    Math.Log(10.0),   // log(Gamma50)
+                    -10.0
+                };
+            }
+
+            return new[]
+            {
+                200.0,  // D50
+                10.0,   // Gamma50
+                -10.0
+            };
         }
 
         protected override double[] GetInitialParameters()
         {
-            
             double d50Init = 50.0;
             double gammaInit = 2.0;
-            return new double[] { d50Init, gammaInit, -10.0 };
-            
+
+            if (_useLogSpace)
+            {
+                return new[]
+                {
+                    Math.Log(d50Init),
+                    Math.Log(gammaInit),
+                    -10.0
+                };
+            }
+
+            return new[]
+            {
+                d50Init,
+                gammaInit,
+                -10.0
+            };
         }
 
         protected override double[] CalculateStandardErrors(double[] optimizedParams, double? logLikelihood)
         {
-            return new double[] { Double.NaN, Double.NaN, Double.NaN };
+            return new[] { double.NaN, double.NaN, double.NaN };
         }
 
         public override double ComputeTcp(ProbitTcpParameters parameters, IPlanItem planItem)
         {
-            //if (parameters.D50 < 1e-3)
-            //{
-            //    return 0;
-            //}
-
-            if (parameters.D50 <= 0.0) return 0.5; // or return 0.0, but better is penalize in LL
+            // This should only ever see PHYSICAL parameters.
+            // Penalize() already rejects invalid regions, but keep guards for safety:
+            if (parameters.D50 <= 0.0) return 0.5;
             if (parameters.Gamma50 < 0.0) return 0.5;
 
-
             var structureId = StructureSelector(planItem);
-            Geud2GyModel geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);
-            var model = new TcpProbitModel( geudModel, parameters.D50, parameters.Gamma50);
+            var geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);
+            var model = new TcpProbitModel(geudModel, parameters.D50, parameters.Gamma50);
+
             var points = planItem.CalculateEqd2DoseDistribution(structureId, AlphaOverBeta);
             var tcp = model.ComputeTcp(points);
-            if (tcp.Value < 0.2)
-            {
-                Debug.WriteLine("");
-            }
+
             return tcp.Value;
         }
     }

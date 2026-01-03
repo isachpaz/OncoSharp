@@ -13,7 +13,7 @@ namespace OncoSharp.Statistics.Models.Tcp
     {
         public double AlphaVolumeEffect { get; }
 
-        public ProbitTcpEstimatorWithFixedAlphaEffect(DoseValue alphaOverBeta, int numberOfMultipleStarts, double alphaVolumeEffect) : base(alphaOverBeta, numberOfMultipleStarts)
+        public ProbitTcpEstimatorWithFixedAlphaEffect(DoseValue alphaOverBeta, int numberOfMultipleStarts, double alphaVolumeEffect) : base(alphaOverBeta, numberOfMultipleStarts, false)
         {
             AlphaVolumeEffect = alphaVolumeEffect;
         }

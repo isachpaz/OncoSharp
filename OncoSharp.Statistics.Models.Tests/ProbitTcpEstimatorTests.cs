@@ -20,7 +20,7 @@ public class ProbitTcpEstimatorTests
     public void Fit_ShouldEstimateReasonableParameters()
     {
         // Arrange
-        var estimator = new ProbitTcpEstimator(DoseValue.InGy(10), 20);
+        var estimator = new ProbitTcpEstimator(DoseValue.InGy(10), 20, false);
 
         // Simulate patients: responders received 77 Gy, non-responders received 70 Gy
         var responders = new List<IPlanItem>
