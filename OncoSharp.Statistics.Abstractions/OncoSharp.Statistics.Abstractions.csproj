@@ -7,7 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+	  <PackageReference Include="Plotly.NET" Version="5.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\OncoSharp.Optimization.Abstractions\OncoSharp.Optimization.Abstractions.csproj" />
+		<ProjectReference Include="..\OncoSharp.Optimization.Algorithms\OncoSharp.Optimization.Algorithms.csproj" />
 	</ItemGroup>
 
 </Project>

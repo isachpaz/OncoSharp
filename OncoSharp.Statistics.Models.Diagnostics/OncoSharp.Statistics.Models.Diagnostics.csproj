@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OncoSharp.Statistics.Abstractions\OncoSharp.Statistics.Abstractions.csproj" />
+    <ProjectReference Include="..\OncoSharp.Statistics.Models\OncoSharp.Statistics.Models.csproj" />
   </ItemGroup>
 
 </Project>
