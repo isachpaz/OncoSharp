@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Microsoft.FSharp.Core;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using Plotly.NET;
 using Plotly.NET.TraceObjects;
@@ -30,6 +31,8 @@ namespace OncoSharp.Statistics.Abstractions.Diagnostics
         /// <param name="outputPath">Path to save the plot HTML (optional).</param>
         /// <param name="title">Plot title.</param>
         /// <param name="doseLabel">X-axis label for the dose.</param>
+        /// <param name="observedLabels">Optional labels for observed points (e.g., case IDs).</param>
+        /// <param name="predictedLabels">Optional labels for predicted points.</param>
         /// <param name="curveX">Optional x-values for a model response curve.</param>
         /// <param name="curveY">Optional y-values for a model response curve.</param>
         /// <param name="curveName">Legend label for the model response curve.</param>
@@ -45,6 +48,8 @@ namespace OncoSharp.Statistics.Abstractions.Diagnostics
             string outputPath = null,
             string title = "TCP vs Dose",
             string doseLabel = "Dose",
+            IReadOnlyList<string> observedLabels = null,
+            IReadOnlyList<string> predictedLabels = null,
             IReadOnlyList<double> curveX = null,
             IReadOnlyList<double> curveY = null,
             string curveName = "Model curve",
@@ -58,6 +63,10 @@ namespace OncoSharp.Statistics.Abstractions.Diagnostics
             if (doseSelector == null) throw new ArgumentNullException(nameof(doseSelector));
             if (inputData.Count != observations.Count)
                 throw new ArgumentException("Observations and inputData must have the same number of elements.");
+            if (observedLabels != null && observedLabels.Count != inputData.Count)
+                throw new ArgumentException("observedLabels must have the same number of elements as inputData.");
+            if (predictedLabels != null && predictedLabels.Count != inputData.Count)
+                throw new ArgumentException("predictedLabels must have the same number of elements as inputData.");
 
             var doses = new List<double>(inputData.Count);
             var predicted = new List<double>(inputData.Count);
@@ -82,17 +91,25 @@ namespace OncoSharp.Statistics.Abstractions.Diagnostics
                 throw new InvalidOperationException("No valid points available for plotting.");
 
             var observedMarker = Marker.init(Color: Color.fromString("black"), Size: 8);
+            FSharpOption<IEnumerable<string>> observedText = observedLabels == null
+                ? null
+                : FSharpOption<IEnumerable<string>>.Some(observedLabels);
             var observedChart = Chart2D.Chart.Point<double, double, string>(
                 x: doses.ToArray(),
                 y: observed.ToArray(),
                 Name: "Observed",
+                MultiText: observedText,
                 Marker: observedMarker);
 
             var predictedMarker = Marker.init(Color: Color.fromString("#1f77b4"), Size: 8);
+            FSharpOption<IEnumerable<string>> predictedText = predictedLabels == null
+                ? null
+                : FSharpOption<IEnumerable<string>>.Some(predictedLabels);
             var predictedChart = Chart2D.Chart.Point<double, double, string>(
                 x: doses.ToArray(),
                 y: predicted.ToArray(),
                 Name: "Predicted",
+                MultiText: predictedText,
                 Marker: predictedMarker);
 
             var charts = new List<GenericChart>

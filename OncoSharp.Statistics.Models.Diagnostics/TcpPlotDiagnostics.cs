@@ -50,6 +50,7 @@ namespace OncoSharp.Statistics.Models.Diagnostics
             var geudModel = new Geud2GyModel(parameters.AlphaVolumeEffect);
             double[] curveX = null;
             double[] curveY = null;
+            var observedLabels = new List<string>(inputData.Count);
 
             var doseSamples = new List<double>(inputData.Count);
             foreach (var planItem in inputData)
@@ -61,6 +62,7 @@ namespace OncoSharp.Statistics.Models.Diagnostics
                 {
                     doseSamples.Add(geud);
                 }
+                observedLabels.Add(FormatCaseLabel(planItem));
             }
 
             if (doseSamples.Count > 1 && parameters.D50 > 0.0 && parameters.Gamma50 >= 0.0)
@@ -96,11 +98,19 @@ namespace OncoSharp.Statistics.Models.Diagnostics
                 outputPath: outputPath,
                 title: title,
                 doseLabel: doseLabel,
+                observedLabels: observedLabels,
                 curveX: curveX,
                 curveY: curveY,
                 curveName: "Model response",
                 width: width,
                 height: height);
+        }
+
+        private static string FormatCaseLabel(IPlanItem planItem)
+        {
+            string patientId = planItem?.PatientId ?? string.Empty;
+            string planId = planItem?.PlanId ?? string.Empty;
+            return string.IsNullOrWhiteSpace(planId) ? patientId : $"{patientId}/{planId}";
         }
 
         private static double ProbitResponse(double dose, double d50, double gamma50)
