@@ -41,7 +41,7 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override (bool isNeeded, double penalityValue) Penalize(D50GammaTcpParameters parameters)
         {
-            throw new NotImplementedException();
+            return (false, double.NaN);
         }
 
         protected override double[] GetInitialParameters()

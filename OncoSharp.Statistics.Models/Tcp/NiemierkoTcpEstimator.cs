@@ -5,15 +5,16 @@
 // See https://github.com/isachpaz/OncoSharp for more information.
 
 using OncoSharp.Core.Quantities.Dose;
+using OncoSharp.Core.Quantities.Extensions;
 using OncoSharp.Optimization.Abstractions.Interfaces;
+using OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt;
 using OncoSharp.Optimization.Algorithms.Simplex;
+using OncoSharp.Radiobiology.GEUD;
+using OncoSharp.Radiobiology.TCP;
 using OncoSharp.RTDomainModel;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Tcp.Parameters;
 using System;
-using OncoSharp.Core.Quantities.Extensions;
-using OncoSharp.Radiobiology.GEUD;
-using OncoSharp.Radiobiology.TCP;
 
 namespace OncoSharp.Statistics.Models.Tcp
 {
@@ -40,27 +41,29 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override IOptimizer CreateSolver(int parameterCount)
         {
-            return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            //return new SimplexGlobalOptimizer(numberOfMultipleStarts: NumberOfMultipleStarts);
+            return new NloptMultiStartLocalOptimizer();
         }
 
         protected override (bool isNeeded, double penalityValue) Penalize(NiemierkoTcpParameters parameters)
         {
-            throw new NotImplementedException();
+            return (false, Double.NaN);
+            //throw new NotImplementedException();
         }
 
         protected override double[] GetInitialParameters()
         {
-            return new double[] { 0.0, 0.0, -10.0 };
+            return new double[] { 0.0, 0.0, -10.0 }; // D50, gamma50, alpha-volume-effect
         }
 
         protected override double[] GetLowerBounds()
         {
-            return new double[] { 0.0, 0.0, -200.0 };
+            return new double[] { 0.0, 0.0, -10.0 };
         }
 
         protected override double[] GetUpperBounds()
         {
-            return new double[] { 200, 30, 0.0 };
+            return new double[] { 200, 30, -10.0 };
         }
 
         protected override double[] CalculateStandardErrors(double[] optimizedParams, double? logLikelihood)

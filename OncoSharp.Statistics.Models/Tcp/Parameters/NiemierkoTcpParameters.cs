@@ -42,5 +42,12 @@ namespace OncoSharp.Statistics.Models.Tcp.Parameters
         }
 
         public string[] ParameterNames => new string[] { "D50", "Gamma50", "AlphaVolumeEffect" };
+
+        public override string ToString()
+        {
+            return
+                $"{nameof(D50)}: {D50}, {nameof(Gamma50)}: {Gamma50}, {nameof(AlphaVolumeEffect)}: {AlphaVolumeEffect}";
+        }
+
     }
 }
