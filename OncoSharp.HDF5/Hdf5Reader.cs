@@ -7,6 +7,7 @@
 using OncoSharp.HDF5.DataModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -85,6 +86,8 @@ namespace OncoSharp.HDF5
         {
             EnsureNotDisposed();
             var datasetPath = BuildDosePath(patientId, courseId, planId, structureId);
+            if (!LinkExists(_fileId, datasetPath))
+                throw new IOException($"Dose dataset not found: {datasetPath}");
             long datasetId = H5D.open(_fileId, datasetPath);
             if (datasetId < 0)
                 throw new IOException($"Dose dataset not found: {datasetPath}");
@@ -134,6 +137,10 @@ namespace OncoSharp.HDF5
         /// </remarks>
         public Patient GetPatientModel(string patientId)
         {
+            if (patientId == "35830111")
+            {
+                Debug.WriteLine("....");
+            }
             EnsureNotDisposed();
             var patient = new Patient(patientId);
             var patientPath = BuildPatientPath(patientId);
@@ -165,6 +172,8 @@ namespace OncoSharp.HDF5
             foreach (var roiId in GetChildNames(planRoiPath))
             {
                 var datasetPath = $"{planRoiPath}/{roiId}/dose";
+                if (!LinkExists(_fileId, datasetPath))
+                    continue;
                 long datasetId = H5D.open(_fileId, datasetPath);
                 if (datasetId < 0) continue;
 
@@ -243,6 +252,9 @@ namespace OncoSharp.HDF5
 
         private IReadOnlyList<string> GetChildNames(string groupPath)
         {
+            if (H5L.exists(_fileId, groupPath, H5P.DEFAULT) <= 0)
+                return Array.Empty<string>();
+
             long groupId = H5G.open(_fileId, groupPath);
             if (groupId < 0) return Array.Empty<string>();
 
@@ -381,6 +393,9 @@ namespace OncoSharp.HDF5
                 fileId = H5F.open(_filePath, H5F.ACC_RDONLY);
                 if (fileId < 0)
                     throw new IOException($"Failed to reopen HDF5 file: {_filePath}");
+
+                if (!LinkExists(fileId, datasetPath))
+                    throw new IOException($"Dose dataset not found: {datasetPath}");
 
                 datasetId = H5D.open(fileId, datasetPath);
                 if (datasetId < 0)
@@ -539,6 +554,14 @@ namespace OncoSharp.HDF5
             var buffer = new byte[length];
             Marshal.Copy(ptr, buffer, 0, length);
             return System.Text.Encoding.UTF8.GetString(buffer);
+        }
+
+        private static bool LinkExists(long fileId, string path)
+        {
+            if (fileId < 0 || string.IsNullOrWhiteSpace(path))
+                return false;
+
+            return H5L.exists(fileId, path, H5P.DEFAULT) > 0;
         }
 
         private void EnsureNotDisposed()
