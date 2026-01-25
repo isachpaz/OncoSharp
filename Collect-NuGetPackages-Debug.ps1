@@ -2,7 +2,7 @@
 $rootPath = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 # Define the output folder where all .nupkg files will be collected
-$outputFolder = Join-Path -Path $rootPath -ChildPath "CollectedPackages"
+$outputFolder = Join-Path -Path $rootPath -ChildPath "CollectedPackagesDebug"
 
 # Create the output folder if it doesn't exist
 if (-not (Test-Path $outputFolder)) {
@@ -36,8 +36,8 @@ if ($projects.Count -eq 0) {
 
 $failed = @()
 foreach ($project in $projects) {
-    Write-Host "Packing: $($project.FullName)"
-    dotnet pack $project.FullName -c Release -o $outputFolder --no-restore
+    Write-Host "Packing (Debug): $($project.FullName)"
+    dotnet pack $project.FullName -c Debug -o $outputFolder --no-restore
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Failed: $($project.FullName)"
         $failed += $project.FullName
@@ -50,4 +50,4 @@ if ($failed.Count -gt 0) {
     exit 1
 }
 
-Write-Host "`nDone. All packages are in: $outputFolder"
+Write-Host "`nDone. All Debug packages are in: $outputFolder"

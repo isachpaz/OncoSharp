@@ -24,6 +24,6 @@ namespace OncoSharp.RTDomainModel
         DoseCloudPoints<EQD2Value> CalculateEqd2DoseDistribution(string structureId, DoseValue abRatio);
         DoseCloudPoints<EQD0Value> CalculateEqd0DoseDistribution(string structureId, DoseValue abRatio);
 
-        VolumeValue GetStructureVolume(string structureId);
+        
     }
 }

@@ -2,7 +2,6 @@
 using OncoSharp.Core.Quantities.Dose;
 using OncoSharp.Core.Quantities.Extensions;
 using OncoSharp.Core.Quantities.Fractions;
-using OncoSharp.Core.Quantities.Volume;
 using OncoSharp.RTDomainModel;
 
 namespace OncoSharp.Statistics.Models.Tests
@@ -40,10 +39,5 @@ namespace OncoSharp.Statistics.Models.Tests
             throw new NotImplementedException();
         }
 
-        public VolumeValue GetStructureVolume(string structureId)
-        {
-            // Optional: Implement if needed
-            return VolumeValue.InCM3(100.0);
-        }
     }
 }

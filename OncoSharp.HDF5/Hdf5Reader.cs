@@ -130,7 +130,7 @@ namespace OncoSharp.HDF5
         ///     Console.WriteLine($"Structures Count: {structures.Count}");
         ///     Console.WriteLine($"Brain voxels: {brainDose.Length}");
         ///
-        ///     repository.Patients[patientModel.PatientId] = patientModel;
+        ///     repository.AddOrReplacePatient(patientModel);
         ///     Console.WriteLine($"Repository now tracks {repository.Patients.Count} patient(s).");
         /// }
         /// </code>
@@ -243,6 +243,12 @@ namespace OncoSharp.HDF5
                 planSum.Attributes["Weights"] = string.Join(",",
                     weights.Select(w => w.ToString(CultureInfo.InvariantCulture)));
                 planSum.Attributes["Hdf5Path"] = planSumPath;
+
+                foreach (var id in ids)
+                {
+                    if (course.TryGetPlan(id, out var plan) && planSum.CanAddPlan(plan))
+                        planSum.AddPlan(plan);
+                }
             }
             finally
             {

@@ -45,7 +45,7 @@ namespace OncoSharp.HDF5
                         continue;
 
                     var patient = reader.GetPatientModel(patientId);
-                    repository.Patients[patient.PatientId] = patient;
+                    repository.AddOrReplacePatient(patient);
                 }
             }
         }

@@ -51,7 +51,8 @@ namespace OncoSharp.Core.Quantities.Dose
         }
 
 
-        public override string ToString() => ToString(null, null);
+        public override string ToString() =>
+            $"{nameof(Value)}: {Value}, {nameof(Unit)}: {Unit}";
 
         public string GetUnitAsString()
         {
@@ -172,5 +173,7 @@ namespace OncoSharp.Core.Quantities.Dose
         {
             return New(this.Value * dValue, this.Unit);
         }
+
+          
     }
 }

@@ -1,14 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-	  <Version>1.0.1</Version>
-	  <!-- NuGet Package version -->
-	  <AssemblyVersion>1.0.1</AssemblyVersion>
-	  <!-- Runtime binding -->
-	  <FileVersion>1.0.1</FileVersion>
-	  <!-- DLL file version in Windows -->
-
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+	  
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <RepositoryUrl>https://github.com/isachpaz/OncoSharp</RepositoryUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -45,3 +39,4 @@
   </ItemGroup>
 
 </Project>
+

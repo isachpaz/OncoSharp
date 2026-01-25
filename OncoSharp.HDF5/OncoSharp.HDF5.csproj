@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <AutoBumpVersion>false</AutoBumpVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,9 +11,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\\OncoSharp.Core\\OncoSharp.Core.csproj" />
+    <ProjectReference Include="..\\OncoSharp.RTDomainModel\\OncoSharp.RTDomainModel.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="HDF.PInvoke.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
+  <Target Name="BumpVersion" BeforeTargets="BeforeBuild" Condition="'$(AutoBumpVersion)' == 'true'">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\\..\\scripts\\bump-version.ps1&quot; -VersionFile &quot;$(MSBuildProjectDirectory)\\..\\Directory.Build.props&quot;" />
+  </Target>
+
 </Project>
+

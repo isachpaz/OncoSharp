@@ -4,24 +4,17 @@
 // Commercial use requires a separate license.
 // See https://github.com/isachpaz/OncoSharp for more information.
 
+using System;
+using Microsoft.Extensions.Logging;
+using NLoptNet;
+using OncoSharp.Optimization.Abstractions.Interfaces;
+using OncoSharp.Optimization.Abstractions.Models;
+using OncoSharp.Optimization.Algorithms.NLopt.OncoSharp.Optimization.Algorithms.NLopt;
+
 namespace OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt
 {
 
     // Optional logging
-    using Microsoft.Extensions.Logging;
-    // Adjust namespace to your NLoptNet package
-    using NLoptNet;
-    using OncoSharp.Optimization.Abstractions.Interfaces;
-    using OncoSharp.Optimization.Abstractions.Models;
-    using OncoSharp.Optimization.Algorithms.NLopt.OncoSharp.Optimization.Algorithms.NLopt;
-    using System;
-    using System.Linq;
-
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.Extensions.Logging;
-    using NLoptNet; // adjust if your namespace differs
-
     public class NloptMultiStartLocalOptimizer : IOptimizer
     {
         public int NumberOfMultipleStarts { get; private set; }
@@ -182,8 +175,7 @@ namespace OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt
                     algorithm,
                     n,
                     _relativeStoppingTolerance,
-                    _maximumIterations,
-                    null);
+                    _maximumIterations);
 
                 opt.SetLowerBounds(_lowerBounds);
                 opt.SetUpperBounds(_upperBounds);

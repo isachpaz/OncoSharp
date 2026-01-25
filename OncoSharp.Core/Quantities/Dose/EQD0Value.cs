@@ -164,7 +164,7 @@ namespace OncoSharp.Core.Quantities.Dose
 
         public EQD0Value TNew(double value, DoseUnit unit)
         {
-            throw new NotImplementedException();
+            return new EQD0Value(value, unit);
         }
 
         public override string ToString()
@@ -256,10 +256,7 @@ namespace OncoSharp.Core.Quantities.Dose
 
         public double GetValue() => Value;
 
-        DoseUnit IQuantityGetters<EQD0Value, DoseUnit>.GetUnits()
-        {
-            throw new NotImplementedException();
-        }
+        DoseUnit IQuantityGetters<EQD0Value, DoseUnit>.GetUnits() => Unit;
 
         public string GetUnits() => UnitAsString;
 
