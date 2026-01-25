@@ -23,5 +23,10 @@ namespace OncoSharp.Core.Quantities.CloudPoint
             Dose = dose;
             Volume = volume;
         }
+
+        public override string ToString()
+        {
+            return $"{nameof(Dose)}: {Dose}, {nameof(Volume)}: {Volume}";
+        }
     }
 }
