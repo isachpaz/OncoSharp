@@ -396,7 +396,26 @@ namespace OncoSharp.HDF5
             }
         }
 
-        private static bool NativeLinkExists(long locId, string path) => H5L.exists(locId, path) > 0;
+        private static bool NativeLinkExists(long locId, string path)
+        {
+            if (locId < 0 || string.IsNullOrWhiteSpace(path))
+                return false;
+
+            // Silence HDF5 diagnostics while probing for a missing link.
+            H5E.auto_t previousFunc = null;
+            IntPtr previousData = IntPtr.Zero;
+            var status = H5E.get_auto(H5E.DEFAULT, ref previousFunc, ref previousData);
+            try
+            {
+                H5E.set_auto(H5E.DEFAULT, null, IntPtr.Zero);
+                return H5L.exists(locId, path) > 0;
+            }
+            finally
+            {
+                if (status >= 0)
+                    H5E.set_auto(H5E.DEFAULT, previousFunc, previousData);
+            }
+        }
 
         private static long CreateCompressedDatasetProperties(ulong length)
         {

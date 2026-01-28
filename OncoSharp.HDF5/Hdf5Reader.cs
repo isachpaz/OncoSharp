@@ -137,10 +137,6 @@ namespace OncoSharp.HDF5
         /// </remarks>
         public Patient GetPatientModel(string patientId)
         {
-            if (patientId == "35830111")
-            {
-                Debug.WriteLine("....");
-            }
             EnsureNotDisposed();
             var patient = new Patient(patientId);
             var patientPath = BuildPatientPath(patientId);
@@ -258,7 +254,7 @@ namespace OncoSharp.HDF5
 
         private IReadOnlyList<string> GetChildNames(string groupPath)
         {
-            if (H5L.exists(_fileId, groupPath, H5P.DEFAULT) <= 0)
+            if (!LinkExists(_fileId, groupPath))
                 return Array.Empty<string>();
 
             long groupId = H5G.open(_fileId, groupPath);
@@ -567,7 +563,20 @@ namespace OncoSharp.HDF5
             if (fileId < 0 || string.IsNullOrWhiteSpace(path))
                 return false;
 
-            return H5L.exists(fileId, path, H5P.DEFAULT) > 0;
+            // Silence HDF5 diagnostics while probing for a missing link.
+            H5E.auto_t previousFunc = null;
+            IntPtr previousData = IntPtr.Zero;
+            var status = H5E.get_auto(H5E.DEFAULT, ref previousFunc, ref previousData);
+            try
+            {
+                H5E.set_auto(H5E.DEFAULT, null, IntPtr.Zero);
+                return H5L.exists(fileId, path, H5P.DEFAULT) > 0;
+            }
+            finally
+            {
+                if (status >= 0)
+                    H5E.set_auto(H5E.DEFAULT, previousFunc, previousData);
+            }
         }
 
         private void EnsureNotDisposed()
