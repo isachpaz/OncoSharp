@@ -32,6 +32,11 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
         private readonly double _stepGrowthFactor;
         private readonly double _tolerance;
         private double[] _lastMleParameters;
+        private readonly Dictionary<int, double> _lastMleValues = new Dictionary<int, double>();
+        private readonly Dictionary<int, double> _lastMleLogLs = new Dictionary<int, double>();
+        private readonly Dictionary<int, double> _lastTargetLogLs = new Dictionary<int, double>();
+        private readonly Dictionary<int, List<(double value, double logL)>> _evaluationCache =
+            new Dictionary<int, List<(double value, double logL)>>();
 
         // Diagnostic and visualization properties
         public bool EnableDiagnostics { get; set; } = false;
@@ -84,15 +89,20 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             if (paramIndex < 0 || paramIndex >= mleParams.Length)
                 throw new ArgumentOutOfRangeException(nameof(paramIndex));
 
-            _lastMleParameters = (double[])mleParams.Clone();
-
             var lowerBound = _mle.GetLowerBounds()[paramIndex];
             var upperBound = _mle.GetUpperBounds()[paramIndex];
 
             // Initialize profile history for this parameter
-            if (EnableDiagnostics && !ProfileHistories.ContainsKey(paramIndex))
+            if (EnableDiagnostics)
             {
-                ProfileHistories[paramIndex] = new List<(double, double)>();
+                if (!ProfileHistories.ContainsKey(paramIndex))
+                {
+                    ProfileHistories[paramIndex] = new List<(double, double)>();
+                }
+                else
+                {
+                    ProfileHistories[paramIndex].Clear();
+                }
             }
 
             // Handle fixed parameter case
@@ -107,11 +117,17 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             // Keep parameters consistent with the MLE value used for profiling
             double[] profileParams = (double[])mleParams.Clone();
             profileParams[paramIndex] = mleValue;
+            _lastMleParameters = (double[])profileParams.Clone();
+            ResetEvaluationCache(paramIndex);
 
-            double bestLogL = _mle.LogLikelihood(
-                _mle.ConvertVectorToParameters(profileParams),
-                _observations,
-                _inputData);
+            double bestLogL = EvaluateLogLikelihood(mleValue, paramIndex, profileParams);
+            if (!IsFinite(bestLogL))
+            {
+                bestLogL = _mle.LogLikelihood(
+                    _mle.ConvertVectorToParameters(profileParams),
+                    _observations,
+                    _inputData);
+            }
 
             // Record MLE point if diagnostics are enabled
             if (EnableDiagnostics)
@@ -120,6 +136,9 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             }
 
             double targetLogL = bestLogL - _deltaLogL;
+            _lastMleValues[paramIndex] = mleValue;
+            _lastMleLogLs[paramIndex] = bestLogL;
+            _lastTargetLogLs[paramIndex] = targetLogL;
 
             // Lower bound search
             double lower = FindBound(
@@ -140,6 +159,28 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             if (EnableDiagnostics)
             {
                 AddBoundaryPointsIfNeeded(paramIndex, lowerBound, upperBound, profileParams);
+                if (TryGetCiFromHistory(ProfileHistories[paramIndex], targetLogL, mleValue, out double? histLower, out double? histUpper))
+                {
+                    if (histLower.HasValue)
+                    {
+                        if (Math.Abs(lower - histLower.Value) > _tolerance * 10)
+                        {
+                            Debug.WriteLine(
+                                $"ProfileLikelihoodCI paramIndex={paramIndex} lower CI override from history: {lower:G6} -> {histLower.Value:G6}");
+                        }
+                        lower = histLower.Value;
+                    }
+
+                    if (histUpper.HasValue)
+                    {
+                        if (Math.Abs(upper - histUpper.Value) > _tolerance * 10)
+                        {
+                            Debug.WriteLine(
+                                $"ProfileLikelihoodCI paramIndex={paramIndex} upper CI override from history: {upper:G6} -> {histUpper.Value:G6}");
+                        }
+                        upper = histUpper.Value;
+                    }
+                }
                 AddCiPointsIfNeeded(paramIndex, lower, upper, profileParams);
             }
 
@@ -158,46 +199,67 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double paramLowerBound = lowerBounds[paramIndex];
             double paramUpperBound = upperBounds[paramIndex];
 
-            try
-            {
-                var (a, b) = BracketLogLikelihoodDrop(
+            if (!TryBracketLogLikelihoodDrop(
                     direction,
                     startValue,
                     paramIndex,
                     targetLogL,
                     mleParams,
                     paramLowerBound,
-                    paramUpperBound);
-
-                a = MathUtils.Clamp(a, paramLowerBound, paramUpperBound);
-                b = MathUtils.Clamp(b, paramLowerBound, paramUpperBound);
-
-                double fa = EvaluateLogLikelihood(a, paramIndex, mleParams) - targetLogL;
-                double fb = EvaluateLogLikelihood(b, paramIndex, mleParams) - targetLogL;
-
-                if (TryBobyqaRefinement(paramIndex, a, b, targetLogL, mleParams, out double refined))
+                    paramUpperBound,
+                    out double a,
+                    out double b,
+                    out var history))
+            {
+                if (TryFindCrossingFromHistory(history, targetLogL, startValue, direction, out double fallback))
                 {
-                    double fr = EvaluateLogLikelihood(refined, paramIndex, mleParams) - targetLogL;
-                    if (IsFinite(fr))
-                    {
-                        if (Math.Abs(fr) < _tolerance)
-                        {
-                            return refined;
-                        }
-
-                        if (fa * fr <= 0)
-                        {
-                            b = refined;
-                            fb = fr;
-                        }
-                        else if (fr * fb <= 0)
-                        {
-                            a = refined;
-                            fa = fr;
-                        }
-                    }
+                    return fallback;
                 }
 
+                return direction == -1 ? paramLowerBound : paramUpperBound;
+            }
+
+            a = MathUtils.Clamp(a, paramLowerBound, paramUpperBound);
+            b = MathUtils.Clamp(b, paramLowerBound, paramUpperBound);
+
+            double fa = EvaluateLogLikelihood(a, paramIndex, mleParams) - targetLogL;
+            double fb = EvaluateLogLikelihood(b, paramIndex, mleParams) - targetLogL;
+
+            if (!IsFinite(fa) || !IsFinite(fb))
+            {
+                if (TryFindCrossingFromHistory(history, targetLogL, startValue, direction, out double fallback))
+                {
+                    return fallback;
+                }
+
+                return direction == -1 ? paramLowerBound : paramUpperBound;
+            }
+
+            if (TryBobyqaRefinement(paramIndex, a, b, targetLogL, mleParams, out double refined))
+            {
+                double fr = EvaluateLogLikelihood(refined, paramIndex, mleParams) - targetLogL;
+                if (IsFinite(fr))
+                {
+                    if (Math.Abs(fr) < _tolerance)
+                    {
+                        return refined;
+                    }
+
+                    if (fa * fr <= 0)
+                    {
+                        b = refined;
+                        fb = fr;
+                    }
+                    else if (fr * fb <= 0)
+                    {
+                        a = refined;
+                        fa = fr;
+                    }
+                }
+            }
+
+            try
+            {
                 return BisectionSearch(
                     paramIndex,
                     a,
@@ -212,20 +274,31 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             }
             catch (InvalidOperationException)
             {
+                if (TryFindCrossingFromHistory(history, targetLogL, startValue, direction, out double fallback))
+                {
+                    return fallback;
+                }
+
                 // If we can't bracket before hitting a bound, the CI hits the bound
                 return direction == -1 ? paramLowerBound : paramUpperBound;
             }
         }
 
-        private (double a, double b) BracketLogLikelihoodDrop(
+        private bool TryBracketLogLikelihoodDrop(
             int direction,
             double startValue,
             int paramIndex,
             double targetLogL,
             double[] mleParams,
             double lowerFixed,
-            double upperFixed)
+            double upperFixed,
+            out double a,
+            out double b,
+            out List<(double value, double logL)> history)
         {
+            a = double.NaN;
+            b = double.NaN;
+
             // Use parameter-specific step size if available
             double baseStep = ParameterStepSizes.TryGetValue(paramIndex, out double specificStep)
                 ? specificStep
@@ -237,7 +310,7 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             double previousLogL = double.NaN;
 
             // Keep a local history for adaptive stepping; optionally mirror to diagnostics.
-            var history = new List<(double value, double logL)>();
+            history = new List<(double value, double logL)>();
             List<(double value, double logL)> diagnosticHistory = null;
             if (EnableDiagnostics)
             {
@@ -359,14 +432,24 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                             CreateTestParams(mleParams, paramIndex, previous),
                             paramIndex);
                     }
-                    return direction == -1 ? (current, previous) : (previous, current);
+                    if (direction == -1)
+                    {
+                        a = current;
+                        b = previous;
+                    }
+                    else
+                    {
+                        a = previous;
+                        b = current;
+                    }
+                    return true;
                 }
 
                 // If we've hit a bound and still haven't dropped, we can't go further
                 if ((direction == -1 && current <= lowerFixed) ||
                     (direction == 1 && current >= upperFixed))
                 {
-                    throw new InvalidOperationException("Reached bound without bracketing likelihood drop.");
+                    return false;
                 }
 
                 // Check if we're making progress
@@ -404,11 +487,21 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
 
                 if (boundLogL < targetLogL)
                 {
-                    return direction == -1 ? (boundValue, current) : (current, boundValue);
+                    if (direction == -1)
+                    {
+                        a = boundValue;
+                        b = current;
+                    }
+                    else
+                    {
+                        a = current;
+                        b = boundValue;
+                    }
+                    return true;
                 }
             }
 
-            throw new InvalidOperationException("Reached bound without bracketing likelihood drop.");
+            return false;
         }
 
         private double MaximizeWithFixedParameter(double[] fixedParams, int fixedIndex)
@@ -524,6 +617,9 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             if (!IsFinite(fb))
                 fb = EvaluateLogLikelihood(b, paramIndex, mleParams) - targetLogL;
 
+            if (!IsFinite(fa) || !IsFinite(fb))
+                throw new InvalidOperationException("Non-finite log-likelihood encountered in bisection endpoints.");
+
             if (Math.Abs(fa) < _tolerance) return a;
             if (Math.Abs(fb) < _tolerance) return b;
 
@@ -536,6 +632,9 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             {
                 double mid = 0.5 * (a + b);
                 double fm = EvaluateLogLikelihood(mid, paramIndex, mleParams) - targetLogL;
+
+                if (!IsFinite(fm))
+                    throw new InvalidOperationException("Non-finite log-likelihood encountered during bisection.");
 
                 if (Math.Abs(fm) < _tolerance || Math.Abs(b - a) < _tolerance)
                     return mid;
@@ -553,6 +652,96 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             }
 
             return 0.5 * (a + b);
+        }
+
+        private bool TryFindCrossingFromHistory(
+            List<(double value, double logL)> history,
+            double targetLogL,
+            double startValue,
+            int direction,
+            out double crossing)
+        {
+            crossing = double.NaN;
+
+            if (history == null || history.Count < 2)
+                return false;
+
+            var finite = history
+                .Where(p => IsFinite(p.value) && IsFinite(p.logL))
+                .OrderBy(p => p.value)
+                .ToList();
+
+            if (finite.Count < 2)
+                return false;
+
+            double tol = _tolerance * Math.Max(1.0, Math.Abs(startValue));
+
+            if (direction < 0)
+            {
+                var left = finite.Where(p => p.value <= startValue + tol).ToList();
+                if (left.Count < 2)
+                    return false;
+
+                for (int i = left.Count - 1; i > 0; i--)
+                {
+                    var p2 = left[i];
+                    var p1 = left[i - 1];
+                    double y2 = p2.logL - targetLogL;
+                    double y1 = p1.logL - targetLogL;
+
+                    if (Math.Abs(y2) < _tolerance)
+                    {
+                        crossing = p2.value;
+                        return true;
+                    }
+
+                    if (Math.Abs(y1) < _tolerance)
+                    {
+                        crossing = p1.value;
+                        return true;
+                    }
+
+                    if (y1 * y2 < 0)
+                    {
+                        crossing = Interpolate(p1.value, p1.logL, p2.value, p2.logL, targetLogL);
+                        return IsFinite(crossing);
+                    }
+                }
+            }
+            else
+            {
+                var right = finite.Where(p => p.value >= startValue - tol).ToList();
+                if (right.Count < 2)
+                    return false;
+
+                for (int i = 0; i < right.Count - 1; i++)
+                {
+                    var p1 = right[i];
+                    var p2 = right[i + 1];
+                    double y1 = p1.logL - targetLogL;
+                    double y2 = p2.logL - targetLogL;
+
+                    if (Math.Abs(y1) < _tolerance)
+                    {
+                        crossing = p1.value;
+                        return true;
+                    }
+
+                    if (Math.Abs(y2) < _tolerance)
+                    {
+                        crossing = p2.value;
+                        return true;
+                    }
+
+                    if (y1 * y2 < 0)
+                    {
+                        crossing = Interpolate(p1.value, p1.logL, p2.value, p2.logL, targetLogL);
+                        return IsFinite(crossing);
+                    }
+                }
+            }
+
+            return false;
         }
 
         private double BrentSearch(
@@ -642,10 +831,21 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
 
         private double EvaluateLogLikelihood(double value, int paramIndex, double[] mleParams)
         {
+            if (TryGetCachedLogL(paramIndex, value, out double cached))
+            {
+                return cached;
+            }
+
             double[] testParams = (double[])mleParams.Clone();
             testParams[paramIndex] = value;
             double logL = MaximizeWithFixedParameter(testParams, paramIndex);
-            return IsFinite(logL) ? logL : double.NegativeInfinity;
+            if (IsFinite(logL))
+            {
+                CacheLogL(paramIndex, value, logL);
+                return logL;
+            }
+
+            return double.NegativeInfinity;
         }
 
         private double[] CreateTestParams(double[] mleParams, int paramIndex, double value)
@@ -671,6 +871,129 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
         private static bool IsFinite(double value)
         {
             return !double.IsNaN(value) && !double.IsInfinity(value);
+        }
+
+        private void ResetEvaluationCache(int paramIndex)
+        {
+            if (_evaluationCache.TryGetValue(paramIndex, out var cache))
+            {
+                cache.Clear();
+            }
+            else
+            {
+                _evaluationCache[paramIndex] = new List<(double value, double logL)>();
+            }
+        }
+
+        private bool TryGetCachedLogL(int paramIndex, double value, out double logL)
+        {
+            logL = double.NaN;
+            if (!_evaluationCache.TryGetValue(paramIndex, out var cache) || cache.Count == 0)
+                return false;
+
+            double tol = _tolerance * Math.Max(1.0, Math.Abs(value));
+            foreach (var point in cache)
+            {
+                if (Math.Abs(point.value - value) <= tol)
+                {
+                    logL = point.logL;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void CacheLogL(int paramIndex, double value, double logL)
+        {
+            if (!IsFinite(value) || !IsFinite(logL))
+                return;
+
+            if (!_evaluationCache.TryGetValue(paramIndex, out var cache))
+            {
+                cache = new List<(double value, double logL)>();
+                _evaluationCache[paramIndex] = cache;
+            }
+
+            double tol = _tolerance * Math.Max(1.0, Math.Abs(value));
+            foreach (var point in cache)
+            {
+                if (Math.Abs(point.value - value) <= tol)
+                {
+                    return;
+                }
+            }
+
+            cache.Add((value, logL));
+        }
+
+        private bool TryGetCiFromHistory(
+            List<(double value, double logL)> history,
+            double targetLogL,
+            double mleValue,
+            out double? ciLower,
+            out double? ciUpper)
+        {
+            ciLower = null;
+            ciUpper = null;
+
+            if (history == null || history.Count < 2)
+                return false;
+
+            var sortedHistory = history
+                .Where(p => IsFinite(p.value) && IsFinite(p.logL))
+                .OrderBy(p => p.value)
+                .ToArray();
+
+            if (sortedHistory.Length < 2)
+                return false;
+
+            var crossings = new List<double>();
+            for (int i = 0; i < sortedHistory.Length - 1; i++)
+            {
+                double x1 = sortedHistory[i].value;
+                double y1 = sortedHistory[i].logL - targetLogL;
+                double x2 = sortedHistory[i + 1].value;
+                double y2 = sortedHistory[i + 1].logL - targetLogL;
+
+                if (!IsFinite(y1) || !IsFinite(y2))
+                    continue;
+
+                if (Math.Abs(y1) < _tolerance)
+                    crossings.Add(x1);
+                if (Math.Abs(y2) < _tolerance)
+                    crossings.Add(x2);
+
+                if (y1 * y2 < 0)
+                {
+                    double cross = Interpolate(sortedHistory[i].value, sortedHistory[i].logL,
+                                               sortedHistory[i + 1].value, sortedHistory[i + 1].logL,
+                                               targetLogL);
+                    if (IsFinite(cross))
+                    {
+                        crossings.Add(cross);
+                    }
+                }
+            }
+
+            if (crossings.Count == 0)
+                return false;
+
+            double tol = _tolerance * Math.Max(1.0, Math.Abs(mleValue));
+            var left = crossings.Where(value => value <= mleValue + tol).ToList();
+            var right = crossings.Where(value => value >= mleValue - tol).ToList();
+
+            if (left.Count > 0)
+            {
+                ciLower = left.Max();
+            }
+
+            if (right.Count > 0)
+            {
+                ciUpper = right.Min();
+            }
+
+            return ciLower.HasValue || ciUpper.HasValue;
         }
 
         private void AddBoundaryPointsIfNeeded(
@@ -780,8 +1103,20 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                 throw new InvalidOperationException("No finite profile history available for plotting.");
             }
 
-            var mlePoint = baseHistory.OrderByDescending(p => p.logL).First();
-            double threshold = mlePoint.logL - _deltaLogL;
+            double mleValue;
+            double mleLogL;
+            if (!_lastMleValues.TryGetValue(paramIndex, out mleValue) ||
+                !_lastMleLogLs.TryGetValue(paramIndex, out mleLogL) ||
+                !IsFinite(mleValue) || !IsFinite(mleLogL))
+            {
+                var mlePoint = baseHistory.OrderByDescending(p => p.logL).First();
+                mleValue = mlePoint.value;
+                mleLogL = mlePoint.logL;
+            }
+
+            double threshold = _lastTargetLogLs.TryGetValue(paramIndex, out var storedTarget) && IsFinite(storedTarget)
+                ? storedTarget
+                : mleLogL - _deltaLogL;
 
             var lowerBound = _mle.GetLowerBounds()[paramIndex];
             var upperBound = _mle.GetUpperBounds()[paramIndex];
@@ -891,8 +1226,8 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
 
             var mleMarker = Marker.init(Color: Color.fromString("red"), Size: 10);
             var mleChart = Chart2D.Chart.Point<double, double, string>(
-                x: new[] { mlePoint.value },
-                y: new[] { mlePoint.logL },
+                x: new[] { mleValue },
+                y: new[] { mleLogL },
                 Name: "MLE",
                 Marker: mleMarker);
 
@@ -958,7 +1293,7 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                 }
             }
 
-            double mleX = mlePoint.value;
+            double mleX = mleValue;
             double xTol = _tolerance * Math.Max(1.0, Math.Abs(mleX));
             double? ciLower = null;
             double? ciUpper = null;
@@ -1071,16 +1406,28 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
             {
                 return "No finite profile data available. Check log-likelihood evaluations for invalid values.";
             }
-            var mlePoint = history.OrderByDescending(p => p.logL).First();
-            double threshold = mlePoint.logL - _deltaLogL;
+            double mleValue;
+            double mleLogL;
+            if (!_lastMleValues.TryGetValue(paramIndex, out mleValue) ||
+                !_lastMleLogLs.TryGetValue(paramIndex, out mleLogL) ||
+                !IsFinite(mleValue) || !IsFinite(mleLogL))
+            {
+                var mlePoint = history.OrderByDescending(p => p.logL).First();
+                mleValue = mlePoint.value;
+                mleLogL = mlePoint.logL;
+            }
+
+            double threshold = _lastTargetLogLs.TryGetValue(paramIndex, out var storedTarget) && IsFinite(storedTarget)
+                ? storedTarget
+                : mleLogL - _deltaLogL;
 
             string paramName = ParameterNames.TryGetValue(paramIndex, out var name) ? name : $"Parameter {paramIndex}";
 
             var sb = new System.Text.StringBuilder();
             sb.AppendLine($"Profile Likelihood Summary for {paramName}");
             sb.AppendLine("----------------------------------------");
-            sb.AppendLine($"MLE Value: {mlePoint.value:G4}");
-            sb.AppendLine($"Max Log-Likelihood: {mlePoint.logL:G4}");
+            sb.AppendLine($"MLE Value: {mleValue:G4}");
+            sb.AppendLine($"Max Log-Likelihood: {mleLogL:G4}");
             sb.AppendLine($"CI Threshold (ΔLogL = {_deltaLogL:G4}): {threshold:G4}");
 
             // Find confidence limits
@@ -1116,7 +1463,7 @@ namespace OncoSharp.Statistics.Abstractions.ConfidenceInterval
                 }
             }
 
-            double mleX = mlePoint.value;
+            double mleX = mleValue;
             double xTol = _tolerance * Math.Max(1.0, Math.Abs(mleX));
 
             var left = crossings.Where(x => x <= mleX + xTol).ToList();
