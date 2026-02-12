@@ -57,7 +57,11 @@ namespace OncoSharp.Statistics.Models.Tcp
 
         protected override (bool isNeeded, double penalityValue) Penalize(PoissonTcpParameters parameters)
         {
-            throw new NotImplementedException();
+            // parameters here are ALWAYS physical (after ConvertVectorToParameters)
+            if (parameters.D50 <= 0.0) return (true, BadLL);
+            if (parameters.Gamma50 < 0.0) return (true, BadLL); // or <= 0 if you require strictly positive
+
+            return (false, double.NaN);
         }
 
         protected override double[] GetInitialParameters()
