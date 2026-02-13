@@ -23,7 +23,7 @@ namespace OncoSharp.Statistics.Models.Ntcp
 
         protected override (bool isNeeded, double penalityValue) Penalize(LkbNtcpParameters parameters)
         {
-            throw new NotImplementedException();
+            return (false, double.NaN);
         }
 
         protected override double[] GetInitialParameters() => new[] { 50.0, 0.2, 0.5 };

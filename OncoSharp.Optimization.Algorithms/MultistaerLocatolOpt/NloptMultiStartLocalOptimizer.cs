@@ -179,7 +179,7 @@ namespace OncoSharp.Optimization.Algorithms.MultistaerLocatolOpt
 
                 opt.SetLowerBounds(_lowerBounds);
                 opt.SetUpperBounds(_upperBounds);
-
+                
                 // Minimize -f(x) => maximize f(x)
                 opt.SetMinObjective(ObjectiveAdapterMinimizingNegative);
 

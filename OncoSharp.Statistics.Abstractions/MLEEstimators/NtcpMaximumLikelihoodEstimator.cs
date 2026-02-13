@@ -34,6 +34,10 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
             if (observations.Count != inputData.Count)
                 throw new ArgumentException("Mismatch between observations and input data.");
 
+            var penalize = Penalize(parameters);
+            if (penalize.isNeeded)
+                return penalize.penalityValue;
+
             double logLik = 0.0;
             for (int i = 0; i < observations.Count; i++)
             {
