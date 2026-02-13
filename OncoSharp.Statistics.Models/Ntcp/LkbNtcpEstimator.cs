@@ -11,11 +11,29 @@ using OncoSharp.RTDomainModel;
 using OncoSharp.Statistics.Abstractions.MLEEstimators;
 using OncoSharp.Statistics.Models.Ntcp.Parameters;
 using System;
+using System.IO;
+using OncoSharp.Core.Quantities.Dose;
+using OncoSharp.Radiobiology.GEUD;
 
 namespace OncoSharp.Statistics.Models.Ntcp
 {
     public class LkbNtcpEstimator : NtcpMaximumLikelihoodEstimator<IPlanItem, LkbNtcpParameters>
     {
+        public Func<IPlanItem, string> StructureSelector { get; set; }
+        public DoseValue AlphaOverBeta { get; }
+
+
+        public LkbNtcpEstimator(DoseValue alphaOverBeta)
+        {
+            AlphaOverBeta = alphaOverBeta;
+            
+            //if (base._parameterMapper == null)
+            //{
+            //    base._parameterMapper = new D50GammaTcpParameters();
+            //}
+        }
+
+
         protected override IOptimizer CreateSolver(int parameterCount)
         {
             return new SimplexGlobalOptimizer();
@@ -54,9 +72,32 @@ namespace OncoSharp.Statistics.Models.Ntcp
             return 0.5 * (1.0 + MathUtils.Erf(t / Math.Sqrt(2.0)));
         }
 
-        protected override double ComputeNtcp(LkbNtcpParameters parameters, IPlanItem data)
+        public override double ComputeNtcp(LkbNtcpParameters parameters, IPlanItem data)
         {
-            throw new NotImplementedException();
+            double td50 = parameters.TD50;
+            double m = parameters.M;
+            double alphaVolumeEffect = 1.0 / parameters.N;
+
+            double eud = CalculateGeud(data, alphaVolumeEffect);
+            double t = (eud - td50) / (m * td50);
+            return 0.5 * (1.0 + MathUtils.Erf(t / Math.Sqrt(2.0)));
+        }
+
+        protected virtual double CalculateGeud(IPlanItem plan, double alphaVolumeEffect)
+        {
+            var structureId = StructureSelector(plan);
+            if (string.IsNullOrWhiteSpace(structureId))
+                throw new InvalidDataException("StructureId is missing!");
+
+            var geudModel = Geud2GyModel.Create(alphaVolumeEffect);
+
+            var cloud = plan.CalculateEqd2DoseDistribution(structureId, AlphaOverBeta);
+
+            if (cloud?.VoxelDoses is null || cloud.VoxelDoses.Count == 0)
+                throw new InvalidDataException("Dose is missing!");
+
+            var geudResult = geudModel.Calculate(cloud);
+            return geudResult.Value;
         }
     }
 }
