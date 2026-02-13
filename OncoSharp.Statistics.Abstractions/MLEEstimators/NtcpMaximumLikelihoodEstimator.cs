@@ -57,6 +57,6 @@ namespace OncoSharp.Statistics.Abstractions.MLEEstimators
         /// for the given parameters and input data.
         /// Must be implemented by the subclass.
         /// </summary>
-        protected abstract double ComputeNtcp(TParameters parameters, TData data);
+        public abstract double ComputeNtcp(TParameters parameters, TData data);
     }
 }
